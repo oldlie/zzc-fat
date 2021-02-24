@@ -1,10 +1,11 @@
-# 张张陈基金分析工具
+# ZZC基金分析工具
 
 #### Description
-张张陈基金分析工具
+ZZC基金分析工具
 
 #### Software Architecture
-Software architecture description
+app         # desktop application based
+funds-ui    # desktop application UI project
 
 #### Installation
 

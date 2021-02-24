@@ -10,7 +10,22 @@
 5.  基金风格池表
 6.  基金风格映射表
 
-### 基金基本信息
+## 基金基本信息
+
+### API
+
+#### 保存、修改
+
+storeFundsBasicInfo(
+    {
+        id: number, 
+        code: string, 
+        title: string,
+    }
+    ): number
+
+
+### 数据表
 
 funds_basic_info
 
