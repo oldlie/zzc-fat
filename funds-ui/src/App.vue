@@ -1,6 +1,17 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
   <HelloWorld msg="Hello Vue 3 + Vite" />
+
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nonne merninisti licere mihi ista
+    probare, quae sunt a te dicta? Refert tamen, quo modo.
+  </p>
+  <a-divider />
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nonne merninisti licere mihi ista
+    probare, quae sunt a te dicta? Refert tamen, quo modo.
+  </p>
+  
 </template>
 
 <script setup>
