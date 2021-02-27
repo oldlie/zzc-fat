@@ -1,33 +1,68 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Hello Vue 3 + Vite" />
-
-  <p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nonne merninisti licere mihi ista
-    probare, quae sunt a te dicta? Refert tamen, quo modo.
-  </p>
-  <a-divider />
-  <p>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nonne merninisti licere mihi ista
-    probare, quae sunt a te dicta? Refert tamen, quo modo.
-  </p>
-  
+  <a-layout>
+    <a-layout-header class="header">
+      <div class="logo" />
+      <a-menu
+        theme="dark"
+        mode="horizontal"
+        v-model:selectedKeys="selectedKeys1"
+        :style="{ lineHeight: '64px' }"
+      >
+        <a-menu-item key="1">
+          <router-link to="/"> <HomeOutlined />概况 </router-link>
+        </a-menu-item>
+        <a-menu-item key="2"><StockOutlined />分析</a-menu-item>
+      </a-menu>
+    </a-layout-header>
+    <a-layout-content :style="{ background: '#fff', padding: '48px', margin: 0, minHeight: '600px' }">
+      <router-view></router-view>
+    </a-layout-content>
+    <a-layout-footer style="text-align: center">
+      ZZC Funds Analysis Tool ©2021 Created by OLDLIE
+    </a-layout-footer>
+  </a-layout>
 </template>
-
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-
-// This starter template is using Vue 3 experimental <script setup> SFCs
-// Check out https://github.com/vuejs/rfcs/blob/script-setup-2/active-rfcs/0000-script-setup.md
+<script lang="ts">
+import {
+  UserOutlined,
+  LaptopOutlined,
+  HomeOutlined,
+  NotificationOutlined,
+  StockOutlined,
+} from "@ant-design/icons-vue";
+import { defineComponent, ref } from "vue";
+export default defineComponent({
+  components: {
+    UserOutlined,
+    LaptopOutlined,
+    HomeOutlined,
+    NotificationOutlined,
+    StockOutlined,
+  },
+  setup() {
+    return {
+      selectedKeys1: ref<string[]>(["1"]),
+      selectedKeys2: ref<string[]>(["1"]),
+      openKeys: ref<string[]>(["sub1"]),
+    };
+  },
+});
 </script>
-
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+#components-layout-demo-top-side .logo {
+  float: left;
+  width: 120px;
+  height: 31px;
+  margin: 16px 24px 16px 0;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.ant-row-rtl #components-layout-demo-top-side .logo {
+  float: right;
+  margin: 16px 0 16px 24px;
+}
+
+.site-layout-background {
+  background: #fff;
 }
 </style>

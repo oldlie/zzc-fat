@@ -16,6 +16,11 @@
 <script setup>
 import { defineProps, reactive } from 'vue'
 
+const { ipcRenderer } = require('electron')
+
+console.log('trigger');
+ipcRenderer.invoke('saveFundsBasicInfo', 1122, 'hello');
+
 defineProps({
   msg: String
 })
