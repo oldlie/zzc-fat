@@ -55,8 +55,8 @@ d INT, \
 m INT, \
 y INT, \
 funds_code CHAR(6), \
-funds_changs BITINT \
-\)`;
+funds_change BIGINT \
+)`;
 
     sqliteDB.createTable(createFundsDaliyLogTable);
 

@@ -7,12 +7,20 @@
       添加基金</a-button
     >
 
-    <a-table :dataSource="dataSource" :columns="columns" />
+    <a-spin :spinning="infoState.infoLoading">
+      <a-table :dataSource="infoState.dataSource" :columns="infoState.columns" />
+    </a-spin>
   </a-space>
 </template>
-<script>
+<script setup>
 import { defineComponent } from "vue";
 import { PlusOutlined } from "@ant-design/icons-vue";
+import { defineProps, reactive, ref, toRaw } from "vue";
+import { message } from "ant-design-vue";
+import { useRoute, useRouter } from "vue-router";
+
+const { ipcRenderer } = require("electron");
+const router = useRouter();
 
 const defaultColumns = [
   { title: "代码", dataIndex: "funds_code", key: "code" },
@@ -24,21 +32,21 @@ const defaultColumns = [
   { title: "四", dataIndex: "four", key: "four" },
   { title: "五", dataIndex: "five", key: "five" },
 ];
- 
-export default {
-  components: {
-    PlusOutlined,
-  },
-  data() {
-    return {
-      columns: defaultColumns,
-      dataSource: [],
-    };
-  },
-  methods: {
-      openInfoForm () {
-          this.$router.push('/info/form');
-      }
-  },
+
+const openInfoForm = () => {
+  router.push("/info/form");
 };
+
+const infoState = reactive({
+  infoLoading: false,
+  dataSource: [],
+  columns: defaultColumns,
+});
+
+infoState.infoLoading = true;
+ipcRenderer.send("async-info");
+ipcRenderer.on('async-info-reply', (event, info, daliy) => {
+  console.log('info===>', info, daliy);
+  infoState.infoLoading = false;
+});
 </script>

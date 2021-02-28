@@ -2,10 +2,7 @@
   <a-space direction="vertical" style="width: 100%">
     <a-page-header style="border: 1px solid rgb(235, 237, 240)" title="基本信息" />
 
-    <a-button>
-      <template #icon><RollbackOutlined /></template>
-      返回</a-button
-    >
+    <router-link to="/"> <RollbackOutlined />返回 </router-link>
 
     <a-form name="custom-validation" ref="formRef" :model="formState" :rules="rules">
       <a-form-item required has-feedback label="基金代码" name="code">
@@ -44,7 +41,7 @@
 import { defineProps, reactive, ref, toRaw } from "vue";
 import { RollbackOutlined, SaveOutlined } from "@ant-design/icons-vue";
 import { useRoute, useRouter } from "vue-router";
-import { message } from 'ant-design-vue';
+import { message } from "ant-design-vue";
 
 const { ipcRenderer } = require("electron");
 
@@ -58,14 +55,12 @@ const formState = reactive({
   alias: "",
   amount: "",
   style: [1, 2],
-  stylePool: []
+  stylePool: [],
 });
 
 ipcRenderer.send("async-load-style-pool");
 ipcRenderer.on("async-load-style-pool-reply", (event, arg) => {
-  console.log("pool->", arg);
   formState.stylePool = arg;
-  console.log("s.pool->", formState.stylePool);
 });
 
 let checkFundsCode = async (rule, value) => {
@@ -87,32 +82,29 @@ let validateStyle = async (rule, value) => {
 };
 
 const rules = {
-  code: [
-    { validator: checkFundsCode, trigger: "change" },
-  ],
+  code: [{ validator: checkFundsCode, trigger: "change" }],
   title: [{ required: true, message: "请输入基金名称", trigger: "blur" }],
   alias: [{ required: true, message: "请输入基金别名，用于展示", trigger: "blur" }],
-  amount: [
-    { validator: validateAmount, trigger: "change" },
-  ],
+  amount: [{ validator: validateAmount, trigger: "change" }],
   style: [{ validator: validateStyle, trigger: "change" }],
 };
 
 function onSubmit() {
-  console.log("Submit:", formState);
   formState.saveLoading = true;
   console.log("loading", formState.saveLoading);
-  ipcRenderer.send("async-save-basic-info", {
-    code: formState.code,
-    title: formState.title,
-    alias: formState.alias,
-    amount: formState.amount,
-    style: formState.style.join(',')
-  });
+  console.log("toRaw", toRaw(formState));
+  formRef.value
+    .validate()
+    .then(() => {
+      ipcRenderer.send("async-save-basic-info", toRaw(formState));
+    })
+    .catch((err) => {
+      formState.saveLoading = false;
+    });
 }
 ipcRenderer.on("async-save-basic-info-reply", (event, args) => {
   console.log("loading", formState.saveLoading);
   formState.saveLoading = false;
-  message.success('已保存');
+  message.success("已保存");
 });
 </script>
