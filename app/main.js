@@ -1,14 +1,14 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu, MenuItem } = require('electron')
 const path = require('path')
-const {initDatabase} = require('./init-database.js')
+const { initDatabase } = require('./init-database.js')
 
 initDatabase();
 
-function createWindow () {
+function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
+    width: 997,
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -16,11 +16,27 @@ function createWindow () {
     }
   })
 
+  let menu = Menu.getApplicationMenu();
+  let menuItem = new MenuItem({
+    label: 'index.html',
+    click: (menuItem, browserWindow, event) => {
+      mainWindow.loadFile('./ui/index.html')
+      return Promise.resolve();
+    },
+    type: 'normal',
+    visible: true
+  });
+
+  menu.append(menuItem);
+  Menu.setApplicationMenu(menu);
+
+  mainWindow.maximize();
+
   // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
+  mainWindow.loadFile('./ui/index.html')
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 }
 
 // This method will be called when Electron has finished
@@ -28,7 +44,7 @@ function createWindow () {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow()
-  
+
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
@@ -46,7 +62,4 @@ app.on('window-all-closed', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-ipcMain.handle('saveFundsBasicInfo', (evidence, ...args) => {
-  console.log('evidence', evidence);
-  console.log(args);
-});
+require('./basic-info.js');

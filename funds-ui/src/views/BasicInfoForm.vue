@@ -2,8 +2,8 @@
   <a-space direction="vertical" style="width: 100%">
     <a-page-header style="border: 1px solid rgb(235, 237, 240)" title="基本信息" />
 
-    <a-button type="text">
-      <template #icon><PlusOutlined /></template>
+    <a-button>
+      <template #icon><RollbackOutlined /></template>
       返回</a-button
     >
 
@@ -19,28 +19,53 @@
           autocomplete="off"
         />
       </a-form-item>
-      <a-form-item required has-feedback label="基金别名" name="alise">
-        <a-input v-model:value="formState.alise" type="text" autocomplete="off" />
+      <a-form-item required has-feedback label="基金别名" name="alias">
+        <a-input v-model:value="formState.alias" type="text" autocomplete="off" />
       </a-form-item>
       <a-form-item has-feedback label="初始金额" name="amount">
         <a-input prefix="￥" suffix="RMB" v-model:value="formState.amount" />
+      </a-form-item>
+      <a-form-item has-feedback label="基金风格" name="style">
+        <a-checkbox-group v-model:value="formState.style" style="width: 600px">
+          <template v-for="item in formState.stylePool">
+            <a-checkbox :value="item.id" name="style">{{ item.title }}</a-checkbox>
+          </template>
+        </a-checkbox-group>
+      </a-form-item>
+      <a-form-item>
+        <a-button type="primary" @click="onSubmit" :loading="formState.saveLoading"
+          ><template #icon><SaveOutlined /></template>保存</a-button
+        >
       </a-form-item>
     </a-form>
   </a-space>
 </template>
 <script setup>
 import { defineProps, reactive, ref, toRaw } from "vue";
-import { PlusOutlined } from "@ant-design/icons-vue";
+import { RollbackOutlined, SaveOutlined } from "@ant-design/icons-vue";
 import { useRoute, useRouter } from "vue-router";
+import { message } from 'ant-design-vue';
+
+const { ipcRenderer } = require("electron");
 
 const route = useRoute();
 
 const formRef = ref();
 const formState = reactive({
+  saveLoading: false,
   code: "",
   title: "",
-  alise: "",
+  alias: "",
   amount: "",
+  style: [1, 2],
+  stylePool: []
+});
+
+ipcRenderer.send("async-load-style-pool");
+ipcRenderer.on("async-load-style-pool-reply", (event, arg) => {
+  console.log("pool->", arg);
+  formState.stylePool = arg;
+  console.log("s.pool->", formState.stylePool);
 });
 
 let checkFundsCode = async (rule, value) => {
@@ -55,16 +80,39 @@ let validateAmount = async (rule, value) => {
     : Promise.reject("请输入创建时的金额，格式:00000.00");
 };
 
+let validateStyle = async (rule, value) => {
+  return formState.style && formState.style.length > 0
+    ? Promise.resolve()
+    : Promise.reject("请选择基金风格");
+};
+
 const rules = {
   code: [
     { validator: checkFundsCode, trigger: "change" },
-    { required: true, message: "请输入基金名称", trigger: "blur" },
   ],
   title: [{ required: true, message: "请输入基金名称", trigger: "blur" }],
-  alise: [{ required: true, message: "请输入基金别名，用于展示", trigger: "blur" }],
+  alias: [{ required: true, message: "请输入基金别名，用于展示", trigger: "blur" }],
   amount: [
     { validator: validateAmount, trigger: "change" },
-    { required: true, message: "请输入基金名称", trigger: "blur" },
   ],
+  style: [{ validator: validateStyle, trigger: "change" }],
 };
+
+function onSubmit() {
+  console.log("Submit:", formState);
+  formState.saveLoading = true;
+  console.log("loading", formState.saveLoading);
+  ipcRenderer.send("async-save-basic-info", {
+    code: formState.code,
+    title: formState.title,
+    alias: formState.alias,
+    amount: formState.amount,
+    style: formState.style.join(',')
+  });
+}
+ipcRenderer.on("async-save-basic-info-reply", (event, args) => {
+  console.log("loading", formState.saveLoading);
+  formState.saveLoading = false;
+  message.success('已保存');
+});
 </script>

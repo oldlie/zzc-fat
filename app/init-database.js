@@ -20,7 +20,8 @@ d INT, \
 m INT, \ 
 y INT, \ 
 funds_title TEXT, \
-funds_alise TEXT, \
+funds_alias TEXT, \
+init_amount BIGINT,
 current_amount BIGINT \
 )`;
 
@@ -28,7 +29,7 @@ current_amount BIGINT \
 
     /**
      * Funds operation:
-     * operation:买入，卖出，分红
+     * operation:买入，卖出，分红,差额,涨跌
      * opt_amount:本次操作花费的金额
      */
     const createFundsOperationTable = `CREATE TABLE IF NOT EXISTS f_operation(\
@@ -64,6 +65,23 @@ funds_changs BITINT \
      */
     const createFundsStylePoolTable = `CREATE TABLE IF NOT EXISTS f_style_pool(id INTEGER PRIMARY KEY AUTOINCREMENT, s_title TEXT)`;
     sqliteDB.createTable(createFundsStylePoolTable);
+
+    /**
+     insert into f_style_pool (s_title) values ('医药');
+     insert into f_style_pool (s_title) values ('新能源');
+     insert into f_style_pool (s_title) values ('新能源汽车');
+     insert into f_style_pool (s_title) values ('信息技术');
+     insert into f_style_pool (s_title) values ('5G');
+     insert into f_style_pool (s_title) values ('国防军工');
+     insert into f_style_pool (s_title) values ('沪港深');
+     insert into f_style_pool (s_title) values ('互联网');
+     insert into f_style_pool (s_title) values ('互联网国际');
+     insert into f_style_pool (s_title) values ('债券');
+     insert into f_style_pool (s_title) values ('中小盘');
+     insert into f_style_pool (s_title) values ('创新');
+     insert into f_style_pool (s_title) values ('食品饮料');
+     insert into f_style_pool (s_title) values ('指数');
+     */
 
     /**
      * Funds style
