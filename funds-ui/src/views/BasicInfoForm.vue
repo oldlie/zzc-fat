@@ -24,13 +24,13 @@
       </a-form-item>
       <a-form-item has-feedback label="基金风格" name="style">
         <a-checkbox-group v-model:value="formState.style" style="width: 600px">
-          <template v-for="item in formState.stylePool">
+          <template v-for="item in stylePool">
             <a-checkbox :value="item.id" name="style">{{ item.title }}</a-checkbox>
           </template>
         </a-checkbox-group>
       </a-form-item>
       <a-form-item>
-        <a-button type="primary" @click="onSubmit" :loading="formState.saveLoading"
+        <a-button type="primary" @click="onSubmit" :loading="saveLoading"
           ><template #icon><SaveOutlined /></template>保存</a-button
         >
       </a-form-item>
@@ -48,19 +48,20 @@ const { ipcRenderer } = require("electron");
 const route = useRoute();
 
 const formRef = ref();
+const stylePool = ref([]);
+const saveLoading = ref(false);
+
 const formState = reactive({
-  saveLoading: false,
   code: "",
   title: "",
   alias: "",
   amount: "",
   style: [1, 2],
-  stylePool: [],
 });
 
 ipcRenderer.send("async-load-style-pool");
 ipcRenderer.on("async-load-style-pool-reply", (event, arg) => {
-  formState.stylePool = arg;
+  stylePool.value = arg;
 });
 
 let checkFundsCode = async (rule, value) => {
@@ -90,21 +91,18 @@ const rules = {
 };
 
 function onSubmit() {
-  formState.saveLoading = true;
-  console.log("loading", formState.saveLoading);
-  console.log("toRaw", toRaw(formState));
+  saveLoading.value = true;
   formRef.value
     .validate()
     .then(() => {
       ipcRenderer.send("async-save-basic-info", toRaw(formState));
     })
     .catch((err) => {
-      formState.saveLoading = false;
+      saveLoading.value = false;
     });
 }
 ipcRenderer.on("async-save-basic-info-reply", (event, args) => {
-  console.log("loading", formState.saveLoading);
-  formState.saveLoading = false;
+  saveLoading.value = false;
   message.success("已保存");
 });
 </script>

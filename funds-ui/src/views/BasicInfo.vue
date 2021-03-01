@@ -8,13 +8,29 @@
     >
 
     <a-spin :spinning="infoState.infoLoading">
-      <a-table :dataSource="infoState.dataSource" :columns="infoState.columns" />
+      <a-table :dataSource="infoState.dataSource" :columns="infoState.columns">
+        <template #action="{ record }">
+          <span>
+            <a @click="openDailyForm(record)"><PlusOutlined /></a>
+            <a-divider type="vertical" />
+            <a><FormOutlined /></a>
+            <a-divider type="vertical" />
+            <a><DeleteOutlined style="color: #f5222d" /></a>
+          </span>
+        </template>
+      </a-table>
     </a-spin>
   </a-space>
+
+  <a-modal v-model:visible="visible" title="Basic Modal" @ok="handleOk">
+    <p>Some contents...</p>
+    <p>Some contents...</p>
+    <p>Some contents...</p>
+  </a-modal>
 </template>
 <script setup>
 import { defineComponent } from "vue";
-import { PlusOutlined } from "@ant-design/icons-vue";
+import { DeleteOutlined, FormOutlined, PlusOutlined } from "@ant-design/icons-vue";
 import { defineProps, reactive, ref, toRaw } from "vue";
 import { message } from "ant-design-vue";
 import { useRoute, useRouter } from "vue-router";
@@ -22,20 +38,11 @@ import { useRoute, useRouter } from "vue-router";
 const { ipcRenderer } = require("electron");
 const router = useRouter();
 
-const defaultColumns = [
-  { title: "代码", dataIndex: "funds_code", key: "code" },
-  { title: "基金", dataIndex: "funds_title", key: "title" },
-  { title: "操作", dataIndex: "action", key: "action" },
-  { title: "一", dataIndex: "one", key: "one" },
-  { title: "二", dataIndex: "two", key: "two" },
-  { title: "三", dataIndex: "three", key: "three" },
-  { title: "四", dataIndex: "four", key: "four" },
-  { title: "五", dataIndex: "five", key: "five" },
-];
-
 const openInfoForm = () => {
   router.push("/info/form");
 };
+
+let visible = ref(false);
 
 const infoState = reactive({
   infoLoading: false,
@@ -54,24 +61,19 @@ function formatDate(d) {
 function buildDateList() {
   let dates = [];
   let now = new Date();
-  dates.push(formatDate(now));
-  now.setDate(now.getDate() - 1);
-  dates.push(formatDate(now));
-  now.setDate(now.getDate() - 1);
-  dates.push(formatDate(now));
-  now.setDate(now.getDate() - 1);
-  dates.push(formatDate(now));
-  now.setDate(now.getDate() - 1);
-  dates.push(formatDate(now));
+  for (let i = 0; i < 5; i++) {
+    now.setDate(now.getDate() - i);
+    dates.push(formatDate(now));
+  }
   return dates;
 }
-// ======= .Date calculate ==================
+// ======= ./Date calculate ==================
 
 function buildColumns() {
   let columns = [];
   columns.push({ title: "代码", dataIndex: "code", key: "code" });
   columns.push({ title: "基金", dataIndex: "alias", key: "title" });
-  columns.push({ title: "操作", dataIndex: "action", key: "action" });
+  columns.push({ title: "操作", dataIndex: "action", slots: { customRender: "action" } });
   let dates = buildDateList();
   for (let index in dates) {
     let item = dates[index];
@@ -80,7 +82,7 @@ function buildColumns() {
   return columns;
 }
 
-// ======= load inforamtion =================
+// ======= load inforamtion ==================
 infoState.infoLoading = true;
 ipcRenderer.send("async-info");
 ipcRenderer.on("async-info-reply", (event, info, daliy) => {
@@ -129,5 +131,15 @@ ipcRenderer.on("async-info-reply", (event, info, daliy) => {
   infoState.dataSource = data;
   infoState.infoLoading = false;
 });
-// ======= ./ load inforamtion =================
+// ======= ./ load inforamtion ================
+
+// ======= daily log ==========================
+const handleOk = () => {
+  visible.value = false;
+};
+const openDailyForm = (record) => {
+  visible.value = true;
+  console.log(record);
+};
+// ======= daily log ==========================
 </script>
