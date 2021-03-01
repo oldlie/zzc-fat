@@ -5,9 +5,8 @@
  * 基本信息业务逻辑
  */
 const { ipcMain } = require('electron')
+const { sqliteDB } = require('./sqlite_db')
 
-const SqliteDB = require('./sqlite.js').SqliteDB;
-const sqliteDB = new SqliteDB('funds.db');
 
 /**
  * 接收加载基金风格信息事件，并发送一个包含风格列表的返回事件
@@ -93,7 +92,6 @@ ipcMain.on('async-info', (event) => {
              let pr = [];
              for (let index in data) {
                  let sql = `SELECT funds_code,funds_change FROM f_daliy_log WHERE funds_code='${data[index]['code']}' ORDER BY y,m,d DESC LIMIT 5`;
-                 console.log(sql);
                  pr.push(sqliteDB.query(sql));
              }
             Promise.all(pr)
