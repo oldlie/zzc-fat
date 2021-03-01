@@ -7,8 +7,8 @@
       添加基金</a-button
     >
 
-    <a-spin :spinning="infoState.infoLoading">
-      <a-table :dataSource="infoState.dataSource" :columns="infoState.columns">
+    <a-spin :spinning="infoLoading">
+      <a-table :dataSource="infoState.dataSource" :columns="columns">
         <template #action="{ record }">
           <span>
             <a @click="openDailyForm(record)"><PlusOutlined /></a>
@@ -42,12 +42,12 @@ const openInfoForm = () => {
   router.push("/info/form");
 };
 
-let visible = ref(false);
+const visible = ref(false);
+const infoLoading = ref(false);
+const columns = ref(buildColumns());
 
 const infoState = reactive({
-  infoLoading: false,
-  dataSource: [],
-  columns: buildColumns(),
+  dataSource: []
 });
 
 // ====== Date calculate ====================
@@ -83,7 +83,7 @@ function buildColumns() {
 }
 
 // ======= load inforamtion ==================
-infoState.infoLoading = true;
+infoLoading.value = true;
 ipcRenderer.send("async-info");
 ipcRenderer.on("async-info-reply", (event, info, daliy) => {
   console.log("info===>", info, daliy);
@@ -129,7 +129,7 @@ ipcRenderer.on("async-info-reply", (event, info, daliy) => {
   }
   console.log(data);
   infoState.dataSource = data;
-  infoState.infoLoading = false;
+  infoLoading.value = false;
 });
 // ======= ./ load inforamtion ================
 
