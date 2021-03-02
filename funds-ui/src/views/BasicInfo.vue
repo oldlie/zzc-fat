@@ -139,7 +139,7 @@ const handleOk = () => {
 };
 const openDailyForm = (record) => {
   visible.value = true;
-  console.log(record);
+  console.log(record.code);
 };
 // ======= daily log ==========================
 </script>

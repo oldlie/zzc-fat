@@ -47,18 +47,48 @@ opt_amount BIGINT \
 
     /**
      * Funds daliy log
-     * funds_changes:每日金额涨跌变动(按支付宝的方式是包含手续费的)
+     * funds_changes:每日金额涨跌幅度
+     * funds_cal: 根据幅度的计算值
+     * funds_fixed: 手动录入的修正值(默认填写计算值)
+     * funds_amount: 今日基金金额（f_info.current_amount + f_daliy_log.funds_fixed）
      */
     const createFundsDaliyLogTable = `CREATE TABLE IF NOT EXISTS f_daliy_log(\
 id INTEGER PRIMARY KEY AUTOINCREMENT, \
+ymd INT, \
 d INT, \
 m INT, \
 y INT, \
 funds_code CHAR(6), \
-funds_change BIGINT \
+funds_change BIGINT, \
+funds_cal BIGINT, \
+funds_fixed BIGINT, \
+funds_amount BIGINT
 )`;
 
     sqliteDB.createTable(createFundsDaliyLogTable);
+
+    /**
+     * Funds month log
+     */
+    const createFundsMonthLogTable = `CREATE TABLE IF NOT EXISTS f_month_log(\
+id INTEGER PRIMARY KEY AUTOINCREMENT, \
+ym INT,
+funds_amount BIGINT
+`;
+    
+    sqliteDB.createTable(createFundsMonthLogTable);
+
+    /**
+     * Funds year log
+     */
+    const createFundsYearLogTable = `CREATE TABLE IF NOT EXISTS f_year_log(\
+id INTEGER PRIMARY KEY AUTOINCREMENT, \
+y INT,
+funds_amount BIGINT
+`;
+    
+    sqliteDB.createTable(createFundsYearLogTable);
+
 
     /**
      * Funds style pool
