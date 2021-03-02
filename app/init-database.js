@@ -96,6 +96,21 @@ funds_amount BIGINT
     const createFundsStylePoolTable = `CREATE TABLE IF NOT EXISTS f_style_pool(id INTEGER PRIMARY KEY AUTOINCREMENT, s_title TEXT)`;
     sqliteDB.createTable(createFundsStylePoolTable);
 
+    const data = [
+        ['医药'],['新能源'],['新能源汽车'],['信息技术'],['5G'],
+        ['国防军工'],
+        ['沪港深'],
+        ['互联网'],
+        ['互联网国际'],
+        ['债券'],
+        ['中小盘'],
+        ['创新'],
+        ['食品饮料'],
+        ['指数']
+    ];
+    const sql = `INSERT INTO f_style_pool (s_title) values (?)`;
+    sqliteDB.insertData(sql, data);
+
     /**
      insert into f_style_pool (s_title) values ('医药');
      insert into f_style_pool (s_title) values ('新能源');
