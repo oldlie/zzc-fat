@@ -22,10 +22,8 @@
     </a-spin>
   </a-space>
 
-  <a-modal v-model:visible="visible" title="Basic Modal" @ok="handleOk">
-    <p>Some contents...</p>
-    <p>Some contents...</p>
-    <p>Some contents...</p>
+  <a-modal v-model:visible="visible" title="添加记录" @ok="handleOk" :footer="null">
+    <FundDaliyLog :code="'010115'" :ymd="'20210303'" :alias="'Test Fund'" />
   </a-modal>
 </template>
 <script setup>
@@ -34,6 +32,8 @@ import { DeleteOutlined, FormOutlined, PlusOutlined } from "@ant-design/icons-vu
 import { defineProps, reactive, ref, toRaw } from "vue";
 import { message } from "ant-design-vue";
 import { useRoute, useRouter } from "vue-router";
+
+import FundDaliyLog from '../components/FundDaliyLog.vue'
 
 const { ipcRenderer } = require("electron");
 const router = useRouter();
