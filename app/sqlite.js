@@ -95,6 +95,19 @@ DB.SqliteDB.prototype.executeSql = function (sql) {
     });
 };
 
+DB.SqliteDB.prototype.execute = function (sql) {
+    return new Promise((resolve, reject) => {
+        DB.db.run(sql, function (err) {
+            if (null != err) {
+                DB.printErrorInfo(err);
+                reject(err);
+                return;
+            }
+            resolve('done.');
+        });
+    });
+}
+
 DB.SqliteDB.prototype.query = (sql) => {
     return new Promise((resolve, reject) => {
         DB.db.all(sql, function (err, rows) {
