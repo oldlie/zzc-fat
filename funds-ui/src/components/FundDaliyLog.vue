@@ -24,7 +24,7 @@
   </a-form>
 </template>
 <script>
-import { defineComponent, defineProps, reactive, ref, toRaw } from "vue";
+import { defineComponent, reactive, ref, toRaw } from "vue";
 import { RollbackOutlined, SaveOutlined } from "@ant-design/icons-vue";
 import { useRoute, useRouter } from "vue-router";
 import { message } from "ant-design-vue";
