@@ -63,3 +63,4 @@ app.on('window-all-closed', function () {
 // code. You can also put them in separate files and require them here.
 
 require('./business/basic-info.js');
+require('./business/funds_daliy_log.js');

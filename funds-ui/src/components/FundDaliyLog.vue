@@ -4,7 +4,7 @@
       <a-input v-model:value="code" :disabled="true" type="text" autocomplete="off" />
     </a-form-item>
 
-    <a-form-item  has-feedback label="基金别名" name="alias">
+    <a-form-item has-feedback label="基金别名" name="alias">
       <a-input v-model:value="alias" :disabled="true" type="text" autocomplete="off" />
     </a-form-item>
 
@@ -37,10 +37,10 @@ export default defineComponent({
     alias: String,
     ymd: String,
   },
-  data () {
+  data() {
     return {
       saveLoading: false,
-    }
+    };
   },
   setup(props) {
     const now = new Date();
@@ -54,12 +54,17 @@ export default defineComponent({
     };
 
     const rules = {
-      ymd: [{ required: true, message: "请选择一个年月日", trigger: "blur" }],
-      amount: [{ validator: validateAmount, trigger: "change" }],
+      ymd: [
+        { required: true, message: "请选择一个年月日", trigger: "change", type: "object" },
+      ],
+      amount: [
+        { validator: validateAmount, trigger: "change" },
+        { required: true, message: "请选择一个年月日", trigger: "blur" },
+      ],
     };
-
+    let _ymd = props.ymd;
     const formState = reactive({
-      ymd: props.ymd,
+      ymd: _ymd,
       amount: "",
     });
     return {
@@ -70,16 +75,33 @@ export default defineComponent({
   },
   created() {
     const self = this;
-    ipcRenderer.on('async-daliy-save-reply', (event, msg) => {
+    ipcRenderer.on("async-daliy-save-reply", (event, msg) => {
       self.saveLoading = false;
-    })
+      message.success("已保存");
+    });
   },
   methods: {
     onSubmit() {
       this.saveLoading = true;
-      this.formRef.validate().then(()=> {
-        ipcRenderer.send('async-daliy-save', {code: this.code, ymd: this.formState.ymd, amount: formState.amount});
-      })
+      let _v = toRaw(this.formState);
+      console.log('value--->', this.code, _v.ymd, _v.ymd._i);
+      this.formRef
+        .validate()
+        .then(() => {
+          console.log("send async-daliy-save");
+
+          try {
+            ipcRenderer.send("async-daliy-save", {
+              code: this.code,
+              ymd: _v.ymd._i,
+              amount: _v.amount,
+            });
+          } catch (err) {
+            console.log("exception-->", err);
+          }
+          console.log("send: async-daliy-save");
+        })
+        .catch(() => (this.saveLoading = false));
     },
   },
 });

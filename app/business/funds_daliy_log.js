@@ -23,7 +23,7 @@ ipcMain.on('async-daliy-save', (event, args) => {
                 sqliteDB.executeSql(updateSql).then(msg => event.reply('async-daliy-save-reply', '已更新'));
             } else {
                 // 插入
-                const insertSql = `INSERT INTO f_daliy_log (ymd, y, m, d, funds_amount) values ($code, $ymd, $y, $m, $d, $amount)`;
+                const insertSql = `INSERT INTO f_daliy_log (funds_code, ymd, y, m, d, funds_amount) values ($code, $ymd, $y, $m, $d, $amount)`;
                 let y = Number(ymd.substr(0, 4));
                 let m = Number(ymd.substr(4, 2));
                 let d = Number(ymd.substr(6, 2));

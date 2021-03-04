@@ -142,7 +142,7 @@ s_title TEXT \
 };
 
 exports.initDatabase = () => {
-    if (!fs.existsSync(fs)) {
+    if (!fs.existsSync(file)) {
         initDatabase();
     }
 }

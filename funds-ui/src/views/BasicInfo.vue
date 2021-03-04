@@ -117,16 +117,15 @@ ipcRenderer.on("async-info-reply", (event, info, daliy) => {
         let found = false;
         for (let k4 in daliyChange) {
           let _daliy = daliyChange[k4];
-          let ymd =
-            Number(_daliy["y"]) * 10000 + Number(_daliy["m"]) * 100 + Number(_daliy["d"]);
+          let ymd = Number(_daliy['ymd']);
           if (_ymd === ymd) {
-            _item[ymd] = _daliy["funds_change"];
+            _item[_ymd] = _daliy["funds_amount"];
             found = true;
             break;
           }
         }
         if (!found) {
-          _item[ymd] = 0;
+          _item[_ymd] = 0;
         }
       }
     }
