@@ -70,7 +70,7 @@ let checkFundsCode = async (rule, value) => {
 };
 
 let validateAmount = async (rule, value) => {
-  const regex = /^\d+(.\d{1,2})?$/;
+  const regex = /^\d+(.\d{2})?$/;
   return regex.test(value)
     ? Promise.resolve()
     : Promise.reject("请输入创建时的金额，格式:00000.00");

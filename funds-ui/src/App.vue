@@ -31,6 +31,8 @@ import {
   StockOutlined,
 } from "@ant-design/icons-vue";
 import { defineComponent, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+
 export default defineComponent({
   components: {
     UserOutlined,
@@ -40,6 +42,8 @@ export default defineComponent({
     StockOutlined,
   },
   setup() {
+    const router = useRouter();
+    router.push('/');
     return {
       selectedKeys1: ref<string[]>(["1"]),
       selectedKeys2: ref<string[]>(["1"]),

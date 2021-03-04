@@ -62,7 +62,7 @@ funds_code CHAR(6), \
 funds_change BIGINT, \
 funds_cal BIGINT, \
 funds_fixed BIGINT, \
-funds_amount BIGINT
+funds_amount BIGINT \
 )`;
 
     sqliteDB.createTable(createFundsDaliyLogTable);
@@ -72,9 +72,9 @@ funds_amount BIGINT
      */
     const createFundsMonthLogTable = `CREATE TABLE IF NOT EXISTS f_month_log(\
 id INTEGER PRIMARY KEY AUTOINCREMENT, \
-ym INT,
-funds_amount BIGINT
-`;
+ym INT, \
+funds_amount BIGINT \
+)`;
     
     sqliteDB.createTable(createFundsMonthLogTable);
 
@@ -83,9 +83,9 @@ funds_amount BIGINT
      */
     const createFundsYearLogTable = `CREATE TABLE IF NOT EXISTS f_year_log(\
 id INTEGER PRIMARY KEY AUTOINCREMENT, \
-y INT,
-funds_amount BIGINT
-`;
+y INT, \
+funds_amount BIGINT \
+)`;
     
     sqliteDB.createTable(createFundsYearLogTable);
 

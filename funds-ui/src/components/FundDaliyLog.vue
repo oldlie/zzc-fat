@@ -1,18 +1,18 @@
 <template>
   <a-form ref="formRef" :model="formState" :rules="rules">
-    <a-form-item required has-feedback label="基金代码" name="code">
+    <a-form-item has-feedback label="基金代码" name="code">
       <a-input v-model:value="code" :disabled="true" type="text" autocomplete="off" />
     </a-form-item>
 
-    <a-form-item required has-feedback label="基金别名" name="alias">
+    <a-form-item  has-feedback label="基金别名" name="alias">
       <a-input v-model:value="alias" :disabled="true" type="text" autocomplete="off" />
     </a-form-item>
 
-    <a-form-item required has-feedback label="年月日" name="ymd">
+    <a-form-item has-feedback label="年月日" name="ymd">
       <a-date-picker v-model:value="formState.ymd" :format="'YYYYMMDD'" />
     </a-form-item>
 
-    <a-form-item required has-feedback label="今日变化金额" name="amount">
+    <a-form-item has-feedback label="今日变化金额" name="amount">
       <a-input v-model:value="formState.amount" type="text" autocomplete="off" />
     </a-form-item>
 
@@ -29,20 +29,25 @@ import { RollbackOutlined, SaveOutlined } from "@ant-design/icons-vue";
 import { useRoute, useRouter } from "vue-router";
 import { message } from "ant-design-vue";
 
+const { ipcRenderer } = require("electron");
+
 export default defineComponent({
   props: {
     code: String,
     alias: String,
     ymd: String,
   },
+  data () {
+    return {
+      saveLoading: false,
+    }
+  },
   setup(props) {
     const now = new Date();
-    // const today = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
     const formRef = ref();
-    const saveLoading = ref(false);
 
     let validateAmount = async (rule, value) => {
-      const regex = /^\d+(.\d{1,2})?$/;
+      const regex = /^[-]{0,1}\d+(.\d{2})?$/;
       return regex.test(value)
         ? Promise.resolve()
         : Promise.reject("请输入创建时的金额，格式:00000.00");
@@ -59,13 +64,23 @@ export default defineComponent({
     });
     return {
       formRef,
-      saveLoading,
       formState,
       rules,
     };
   },
+  created() {
+    const self = this;
+    ipcRenderer.on('async-daliy-save-reply', (event, msg) => {
+      self.saveLoading = false;
+    })
+  },
   methods: {
-    onSubmit() {},
+    onSubmit() {
+      this.saveLoading = true;
+      this.formRef.validate().then(()=> {
+        ipcRenderer.send('async-daliy-save', {code: this.code, ymd: this.formState.ymd, amount: formState.amount});
+      })
+    },
   },
 });
 </script>
