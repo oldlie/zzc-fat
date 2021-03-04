@@ -23,7 +23,7 @@
   </a-space>
 
   <a-modal v-model:visible="visible" title="添加记录" @ok="handleOk" :footer="null">
-    <FundDaliyLog :code="'010115'" :ymd="'20210303'" :alias="'Test Fund'" />
+    <FundDaliyLog :code="daliyState.code" :ymd="daliyState.ymd" :alias="daliyState.alias" />
   </a-modal>
 </template>
 <script setup>
@@ -45,6 +45,12 @@ const openInfoForm = () => {
 const visible = ref(false);
 const infoLoading = ref(false);
 const columns = ref(buildColumns());
+
+const daliyState = reactive({
+  code: '',
+  ymd: '',
+  alias: ''
+});
 
 const infoState = reactive({
   dataSource: []
@@ -140,6 +146,11 @@ const handleOk = () => {
 const openDailyForm = (record) => {
   visible.value = true;
   console.log(record.code);
+  const now = new Date();
+  let ymdInt = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+  daliyState.code = record.code;
+  daliyState.alias = record.alias;
+  daliyState.ymd = `${ymdInt}` ;
 };
 // ======= daily log ==========================
 </script>
