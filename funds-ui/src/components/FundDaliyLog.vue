@@ -28,7 +28,7 @@ import { defineComponent, reactive, ref, toRaw } from "vue";
 import { RollbackOutlined, SaveOutlined } from "@ant-design/icons-vue";
 import { useRoute, useRouter } from "vue-router";
 import { message } from "ant-design-vue";
-import moment from 'moment';
+import moment from "moment";
 
 const { ipcRenderer } = require("electron");
 
@@ -56,7 +56,12 @@ export default defineComponent({
 
     const rules = {
       ymd: [
-        { required: true, message: "请选择一个年月日", trigger: "change", type: "object" },
+        {
+          required: true,
+          message: "请选择一个年月日",
+          trigger: "change",
+          type: "object",
+        },
       ],
       amount: [
         { validator: validateAmount, trigger: "change" },
@@ -65,7 +70,7 @@ export default defineComponent({
     };
     let _ymd = props.ymd;
     const formState = reactive({
-      ymd: moment(_ymd, 'YYYYMMDD'),
+      ymd: moment(_ymd, "YYYYMMDD"),
       amount: "",
     });
     return {
@@ -79,6 +84,7 @@ export default defineComponent({
     ipcRenderer.on("async-daliy-save-reply", (event, msg) => {
       self.saveLoading = false;
       message.success("已保存");
+      ipcRenderer.send("async-info");
     });
   },
   methods: {
@@ -93,7 +99,7 @@ export default defineComponent({
           try {
             ipcRenderer.send("async-daliy-save", {
               code: this.code,
-              ymd: _v.ymd.format('YYYYMMDD'),
+              ymd: _v.ymd.format("YYYYMMDD"),
               amount: _v.amount,
             });
           } catch (err) {
