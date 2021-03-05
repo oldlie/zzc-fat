@@ -68,8 +68,8 @@ function buildDateList() {
   let dates = [];
   let now = new Date();
   for (let i = 0; i < 5; i++) {
-    now.setDate(now.getDate() - i);
     dates.push(formatDate(now));
+    now.setDate(now.getDate() - 1);
   }
   return dates;
 }
