@@ -84,7 +84,6 @@ export default defineComponent({
     onSubmit() {
       this.saveLoading = true;
       let _v = toRaw(this.formState);
-      console.log('value--->', this.code, _v.ymd, _v.ymd._i);
       this.formRef
         .validate()
         .then(() => {
@@ -93,7 +92,7 @@ export default defineComponent({
           try {
             ipcRenderer.send("async-daliy-save", {
               code: this.code,
-              ymd: _v.ymd._i,
+              ymd: _v.ymd.format('YYYYMMDD'),
               amount: _v.amount,
             });
           } catch (err) {
