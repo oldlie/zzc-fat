@@ -13,7 +13,7 @@
           <span>
             <a @click="openDailyForm(record)"><PlusOutlined /></a>
             <a-divider type="vertical" />
-            <a><FormOutlined /></a>
+            <a @click="editFundInfo(record)"><FormOutlined /></a>
             <a-divider type="vertical" />
             <a><DeleteOutlined style="color: #f5222d" /></a>
           </span>
@@ -41,6 +41,10 @@ const router = useRouter();
 const openInfoForm = () => {
   router.push("/info/form");
 };
+
+function editFundInfo(record) {
+  router.push(`/info/form?code=${record.code}`);
+}
 
 const visible = ref(false);
 const infoLoading = ref(false);
@@ -152,4 +156,6 @@ const openDailyForm = (record) => {
   daliyState.ymd = `${ymdInt}` ;
 };
 // ======= daily log ==========================
+
+
 </script>

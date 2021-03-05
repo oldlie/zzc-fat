@@ -29,42 +29,73 @@ ipcMain.on('async-load-style-pool', (event) => {
  * 2，保存基金的风格到关联表，基本信息和风格是一对多的关系；
  */
 ipcMain.on('async-save-basic-info', (event, args) => {
-    console.log(args);
-    const sql = `insert into f_info (funds_code, d, y, m, funds_title, funds_alias, init_amount, current_amount) values (?,?,?,?,?,?,?,?)`;
+
+    let { code, title, alias, amount, style } = args;
+
     let now = new Date();
     let d = now.getDate();
     let m = now.getMonth() + 1;
     let y = now.getFullYear();
-    let amount = args['amount'];
     if (amount.indexOf('.') >= 0) {
         amount = amount.replace('.', '');
     } else {
         amount = amount + '00';
     }
-    let data = [
-        args['code'], d, y, m, args['title'], args['alias'], amount, amount
-    ];
-    sqliteDB.insert(sql, data)
-        .then(id => {
-            console.log(args['style']);
-            let list = args['style'];
-            if (!(list instanceof Array)) {
-                throw '基金风格应该是数组';
-            }
-            const sql2 = `insert into f_style (funds_code, s_id) values ($code, $sid)`;
-            let data2 = [];
-            for (let i = 0; i < list.length; i++) {
-                let item = list[i];
-                data2.push({
-                    "$code": args['code'],
-                    "$sid": item
-                });
-            }
-            sqliteDB.insertData(sql2, data2).then(msg => {
-                event.reply('async-save-basic-info-reply', id)
-            });
-        })
-        .catch(err => console.log(err));
+
+    const sql2 = `SELECT COUNT(funds_code) as c FROM f_info WHERE funds_code='${code}';`;
+    sqliteDB.query(sql2).then(rows => {
+        let count = rows[0]['c'];
+        if (count > 0) {
+            const sql = `UPDATE f_info SET \
+            funds_title='${title}', funds_alias='${alias}', init_amount=${amount}, current_amount=${amount} \
+            WHERE funds_code='${code}';`;
+            let pr = sqliteDB.query(sql);
+            const sql2 = `DELETE FROM f_style WHERE funds_code='${code}';`;
+            sqliteDB.query(sql2).then(rows => {
+                console.log('delete==>', rows);
+                const sql3 = `insert into f_style (funds_code, s_id) values ($code, $sid)`;
+                let data2 = [];
+                for (let i = 0; i < style.length; i++) {
+                    let item = style[i];
+                    data2.push({
+                        "$code": code,
+                        "$sid": item
+                    });
+                };
+                let pr1 = sqliteDB.insertData(sql3, data2);
+                Promise.all([pr, pr1]).then(value => {
+                    console.log('value', value);
+                    event.reply('async-save-basic-info-reply', value)
+                }).catch(err => console.log(err));
+            })
+        } else {
+            const sql = `insert into f_info (funds_code, d, y, m, funds_title, funds_alias, init_amount, current_amount) values (?,?,?,?,?,?,?,?)`;
+            let data = [
+                args['code'], d, y, m, args['title'], args['alias'], amount, amount
+            ];
+            sqliteDB.insert(sql, data)
+                .then(id => {
+                    console.log(args['style']);
+                    let list = args['style'];
+                    if (!(list instanceof Array)) {
+                        throw '基金风格应该是数组';
+                    }
+                    const sql2 = `insert into f_style (funds_code, s_id) values ($code, $sid)`;
+                    let data2 = [];
+                    for (let i = 0; i < list.length; i++) {
+                        let item = list[i];
+                        data2.push({
+                            "$code": args['code'],
+                            "$sid": item
+                        });
+                    }
+                    sqliteDB.insertData(sql2, data2).then(msg => {
+                        event.reply('async-save-basic-info-reply', id)
+                    });
+                })
+                .catch(err => console.log(err));
+        }
+    });
 });
 
 /**
@@ -89,11 +120,11 @@ ipcMain.on('async-info', (event) => {
             return data;
         })
         .then(data => {
-             let pr = [];
-             for (let index in data) {
-                 let sql = `SELECT funds_code,funds_amount,ymd FROM f_daliy_log WHERE funds_code='${data[index]['code']}' ORDER BY ymd DESC LIMIT 5`;
-                 pr.push(sqliteDB.query(sql));
-             }
+            let pr = [];
+            for (let index in data) {
+                let sql = `SELECT funds_code,funds_amount,ymd FROM f_daliy_log WHERE funds_code='${data[index]['code']}' ORDER BY ymd DESC LIMIT 5`;
+                pr.push(sqliteDB.query(sql));
+            }
             Promise.all(pr)
                 .then(reuslt => {
                     event.reply('async-info-reply', data, reuslt);
@@ -101,4 +132,45 @@ ipcMain.on('async-info', (event) => {
                 .catch(err => console.log(err));
         })
         .catch(err => console.log(err))
+});
+
+/**
+ * 根据code获取一条基金的基本信息
+ */
+ipcMain.on('async-basic-info', (event, args) => {
+    const { code } = args;
+    const sql = `SELECT * FROM f_info WHERE funds_code='${code}'`;
+    const result = {
+        status: 0,
+        data: {}
+    };
+    sqliteDB.query(sql)
+        .then(rows => {
+            const data = rows[0];
+            return {
+                code: data['funds_code'],
+                title: data['funds_title'],
+                alias: data['funds_alias'],
+                amount: data['init_amount']
+            }
+        })
+        .then(data => {
+            const sql2 = `SELECT s_id as sid FROM f_style WHERE funds_code='${data['code']}'`;
+            sqliteDB.query(sql2)
+                .then(rows => {
+                    data['styles'] = rows.map(x => x['sid']);
+                    result.data = data;
+                    event.reply('async-basic-info-reply', result);
+                })
+                .catch(err => {
+                    result.status = 1;
+                    result.data = err;
+                    event.reply('async-basic-info-reply', result);
+                })
+        })
+        .catch(err => {
+            result.status = 1;
+            result.data = err;
+            event.reply('async-basic-info-reply', result);
+        })
 });

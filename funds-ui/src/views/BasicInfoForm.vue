@@ -47,17 +47,36 @@ const { ipcRenderer } = require("electron");
 
 const route = useRoute();
 
+const code = route.query.code;
+
 const formRef = ref();
 const stylePool = ref([]);
 const saveLoading = ref(false);
 
 const formState = reactive({
-  code: "",
+  code: code ? code : '',
   title: "",
   alias: "",
   amount: "",
   style: [1, 2],
 });
+
+if (code) {
+  ipcRenderer.send('async-basic-info', {code: code});
+  ipcRenderer.on('async-basic-info-reply', (event, arg) => {
+    console.log('basic info reply:', arg);
+    const {status, data} = arg;
+    if (status === 0) {
+      let amount = `${data['amount']}`;
+      formState.title = data['title'];  
+      formState.alias = data['alias'];
+      formState.amount = `${amount.substring(0, amount.length - 2)}.${amount.substring(amount.length - 2)}`;
+      formState.style = data['styles'];
+    } else {
+      message.error(data);
+    }
+  });
+}
 
 ipcRenderer.send("async-load-style-pool");
 ipcRenderer.on("async-load-style-pool-reply", (event, arg) => {
