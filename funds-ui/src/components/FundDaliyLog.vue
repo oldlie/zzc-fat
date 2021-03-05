@@ -28,6 +28,7 @@ import { defineComponent, reactive, ref, toRaw } from "vue";
 import { RollbackOutlined, SaveOutlined } from "@ant-design/icons-vue";
 import { useRoute, useRouter } from "vue-router";
 import { message } from "ant-design-vue";
+import moment from 'moment';
 
 const { ipcRenderer } = require("electron");
 
@@ -64,7 +65,7 @@ export default defineComponent({
     };
     let _ymd = props.ymd;
     const formState = reactive({
-      ymd: _ymd,
+      ymd: moment(_ymd, 'YYYYMMDD'),
       amount: "",
     });
     return {
