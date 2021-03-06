@@ -14,6 +14,13 @@
         计算收益</a-button
       >
       -->
+
+      <a-input-search
+        v-model:value="searchValue"
+        placeholder="输入基金代码"
+        style="width: 200px"
+        @search="onSearch"
+      />
     </div>
 
     <a-spin :spinning="infoLoading">
@@ -81,6 +88,7 @@ const visible = ref(false);
 const infoLoading = ref(false);
 const columns = ref(buildColumns());
 const calculateVisible = ref(false);
+const searchValue = ref('');
 
 const daliyState = reactive({
   code: "",
@@ -113,9 +121,9 @@ function buildDateList() {
 
 function buildColumns() {
   let columns = [];
+  columns.push({ title: "操作", dataIndex: "action", slots: { customRender: "action" } });
   columns.push({ title: "代码", dataIndex: "code", key: "code" });
   columns.push({ title: "基金", dataIndex: "alias", key: "title" });
-  columns.push({ title: "操作", dataIndex: "action", slots: { customRender: "action" } });
   let dates = buildDateList();
   for (let index in dates) {
     let item = dates[index];
@@ -201,16 +209,20 @@ const confirmDelete = (record) => {
   ipcRenderer.send("async-basic-info-delete", { code: record.code });
 };
 ipcRenderer.on("async-daliy-delete-reply", (event, args) => {
-  let { status, message } = args;
+  let { status, msg: message } = args;
   if (status === 0) {
-    success.success("已删除");
+    message.success("已删除");
     ipcRenderer.send("async-info-reply");
   } else {
-    success.error(message);
+    message.error(msg);
   }
 });
 
 const openCalculateForm = () => {
   calculateVisible.value = true;
 };
+
+const onSearch = () => {
+  ipcRenderer.send("async-info", {code: searchValue.value});
+}
 </script>

@@ -99,8 +99,15 @@ ipcMain.on('async-save-basic-info', (event, args) => {
  * 1. 获取基金的基本信息；
  * 2. 获取每个基金最近5个交易日的涨跌信息；
  */
-ipcMain.on('async-info', (event) => {
-    const sql = `SELECT funds_code,funds_alias,current_amount FROM f_info ORDER BY funds_code ASC;`;
+ipcMain.on('async-info', (event, args) => {
+    let code = false;
+    if (args) {
+        code = `'${args['code']}%'`;
+    }
+    let sql = `SELECT funds_code,funds_alias,current_amount FROM f_info ORDER BY funds_code ASC;`;
+    if (code) {
+        sql = `SELECT funds_code,funds_alias,current_amount FROM f_info WHERE funds_code like ${code} ORDER BY funds_code ASC;`;
+    }
     sqliteDB.query(sql)
         .then(rows => {
             let data = [];
