@@ -96,17 +96,13 @@ ipcMain.on('async-daliy-delete', (event, args) => {
  */
 ipcMain.on('async-calculate-all', (event, args) => {
     const { ymd } = args;
-    const sql = `SELECT funds_amount as amount FROM f_daliy_log WHERE ymd=${ymd};`;
+    const sql = `SELECT sum(funds_amount) as v FROM f_daliy_log WHERE ymd=${ymd} AND funds_code!=${f_999999};`;
     const result = {
         status: 0,
         message: 'success'
     };
     sqliteDB.query(sql).then(rows => {
-        let sum = 0;
-        rows.forEach(element => {
-            sum = sum + Number(element['amount']);
-        });
-        result['data'] = sum;
+        result['data'] = rows[0].v;
         event.reply('async-calculate-all-reply', result);
     })
         .catch(err => {

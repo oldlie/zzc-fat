@@ -8,10 +8,12 @@
         添加基金</a-button
       >
 
+      <!--
       <a-button @click="openCalculateForm">
         <template #icon><CalculatorOutlined /></template>
         计算收益</a-button
       >
+      -->
     </div>
 
     <a-spin :spinning="infoLoading">
