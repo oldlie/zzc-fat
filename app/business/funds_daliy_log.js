@@ -47,3 +47,27 @@ ipcMain.on('async-daliy-delete', (event, args) => {
     const deleteSql = `DELETE FROM f_daliy_log WHERE ymd=${ymd} AND code=${code}`;
     sqliteDB.execute(deleteSql).then(msg => event.reply('async-daliy-delete-reply', "以删除"));
 })
+
+/**
+ * 计算所有基金某一天的收益
+ */
+ipcMain.on('async-calculate-all', (event, args) => {
+    const { ymd } = args;
+    const sql = `SELECT funds_amount as amount FROM f_daliy_log WHERE ymd=${ymd};`;
+    const result = {
+        status: 0,
+        message: 'success'
+    };
+    sqliteDB.query(sql).then(rows => {
+        let sum = 0;
+        rows.forEach(element => {
+            sum = sum + Number(element['amount']);
+        });
+        result['data'] = sum;
+        event.reply('async-calculate-all-reply', result);
+    })
+    .catch(err => {
+        result.message = err;
+        event.reply('async-calculate-all-reply', result);
+    })
+});

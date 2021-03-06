@@ -7,6 +7,11 @@
       添加基金</a-button
     >
 
+    <a-button @click="openCalculateForm">
+      <template #icon><CalculatorOutlined /></template>
+      计算收益</a-button
+    >
+
     <a-spin :spinning="infoLoading">
       <a-table :dataSource="infoState.dataSource" :columns="columns">
         <template #action="{ record }">
@@ -30,21 +35,27 @@
     </a-spin>
   </a-space>
 
-  <a-modal v-model:visible="visible" title="添加记录" @ok="handleOk" :footer="null">
+  <a-modal v-model:visible="visible" title="添加记录" :footer="null">
     <FundDaliyLog
       :code="daliyState.code"
       :ymd="daliyState.ymd"
       :alias="daliyState.alias"
     />
   </a-modal>
+
+  <a-modal v-model:visible="calculateVisible" title="计算收益" :footer="null">
+    <CalculateForm />
+  </a-modal>
+
 </template>
 <script setup>
 import { defineComponent } from "vue";
-import { DeleteOutlined, FormOutlined, PlusOutlined } from "@ant-design/icons-vue";
+import { CalculatorOutlined, DeleteOutlined, FormOutlined, PlusOutlined } from "@ant-design/icons-vue";
 import { defineProps, reactive, ref, toRaw } from "vue";
 import { message } from "ant-design-vue";
 import { useRoute, useRouter } from "vue-router";
 
+import CalculateForm from "../components/Calucate.vue"
 import FundDaliyLog from "../components/FundDaliyLog.vue";
 
 const { ipcRenderer } = require("electron");
@@ -61,6 +72,7 @@ function editFundInfo(record) {
 const visible = ref(false);
 const infoLoading = ref(false);
 const columns = ref(buildColumns());
+const calculateVisible = ref(false);
 
 const daliyState = reactive({
   code: "",
@@ -173,15 +185,19 @@ const cancelDelete = (record) => {
   // message.success("Click on Yes");
 };
 const confirmDelete = (record) => {
-  ipcRenderer.send('async-basic-info-delete', {code: record.code});
+  ipcRenderer.send("async-basic-info-delete", { code: record.code });
 };
-ipcRenderer.on('async-daliy-delete-reply', (event, args) => {
-  let {status, message} = args;
+ipcRenderer.on("async-daliy-delete-reply", (event, args) => {
+  let { status, message } = args;
   if (status === 0) {
-    success.success('已删除');
-    ipcRenderer.send('async-info-reply');
+    success.success("已删除");
+    ipcRenderer.send("async-info-reply");
   } else {
     success.error(message);
   }
 });
+
+const openCalculateForm = () => {
+  calculateVisible.value = true;
+}
 </script>
