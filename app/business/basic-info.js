@@ -4,7 +4,7 @@
  * 
  * 基本信息业务逻辑
  */
-const { ipcMain } = require('electron')
+const { ipcMain, autoUpdater } = require('electron')
 const { sqliteDB } = require('./sqlite_db')
 
 
@@ -110,10 +110,17 @@ ipcMain.on('async-info', (event) => {
             let data = [];
             for (let key in rows) {
                 let item = rows[key];
+                let amount = `${item['current_amount']}`;
+                if (amount !== '0') {
+                    let length = amount.length - 2;
+                    amount = `${amount.substring(0, length)}.${amount.substring(length)}`;
+                }
+
+                console.log('amount--->', amount);
                 data.push({
                     code: item['funds_code'],
                     alias: item['funds_alias'],
-                    amount: item['current_amount']
+                    amount: amount
                 });
             }
             //event.reply('async-info-reply', data);
@@ -126,8 +133,9 @@ ipcMain.on('async-info', (event) => {
                 pr.push(sqliteDB.query(sql));
             }
             Promise.all(pr)
-                .then(reuslt => {
-                    event.reply('async-info-reply', data, reuslt);
+                .then(result => {
+                    console.log('result ===>', result);
+                    event.reply('async-info-reply', data, result);
                 })
                 .catch(err => console.log(err));
         })
