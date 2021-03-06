@@ -2,15 +2,17 @@
   <a-space direction="vertical" style="width: 100%">
     <a-page-header style="border: 1px solid rgb(235, 237, 240)" title="基本信息" />
 
-    <a-button @click="openInfoForm">
-      <template #icon><PlusOutlined /></template>
-      添加基金</a-button
-    >
+    <div>
+      <a-button @click="openInfoForm">
+        <template #icon><PlusOutlined /></template>
+        添加基金</a-button
+      >
 
-    <a-button @click="openCalculateForm">
-      <template #icon><CalculatorOutlined /></template>
-      计算收益</a-button
-    >
+      <a-button @click="openCalculateForm">
+        <template #icon><CalculatorOutlined /></template>
+        计算收益</a-button
+      >
+    </div>
 
     <a-spin :spinning="infoLoading">
       <a-table :dataSource="infoState.dataSource" :columns="columns">
@@ -46,16 +48,20 @@
   <a-modal v-model:visible="calculateVisible" title="计算收益" :footer="null">
     <CalculateForm />
   </a-modal>
-
 </template>
 <script setup>
 import { defineComponent } from "vue";
-import { CalculatorOutlined, DeleteOutlined, FormOutlined, PlusOutlined } from "@ant-design/icons-vue";
+import {
+  CalculatorOutlined,
+  DeleteOutlined,
+  FormOutlined,
+  PlusOutlined,
+} from "@ant-design/icons-vue";
 import { defineProps, reactive, ref, toRaw } from "vue";
 import { message } from "ant-design-vue";
 import { useRoute, useRouter } from "vue-router";
 
-import CalculateForm from "../components/Calucate.vue"
+import CalculateForm from "../components/Calucate.vue";
 import FundDaliyLog from "../components/FundDaliyLog.vue";
 
 const { ipcRenderer } = require("electron");
@@ -146,10 +152,10 @@ ipcRenderer.on("async-info-reply", (event, info, daliy) => {
         for (let k4 in daliyChange) {
           let _daliy = daliyChange[k4];
           let ymd = Number(_daliy["ymd"]);
-          let amount = `${_daliy["funds_amount"]}`
-          if (amount !== '0') {
+          let amount = `${_daliy["funds_amount"]}`;
+          if (amount !== "0") {
             let _l = amount.length - 2;
-            amount = `${amount.substring(0, _l)}.${amount.substring(_l)}`
+            amount = `${amount.substring(0, _l)}.${amount.substring(_l)}`;
           }
           if (_ymd === ymd) {
             _item[_ymd] = amount;
@@ -204,5 +210,5 @@ ipcRenderer.on("async-daliy-delete-reply", (event, args) => {
 
 const openCalculateForm = () => {
   calculateVisible.value = true;
-}
+};
 </script>
