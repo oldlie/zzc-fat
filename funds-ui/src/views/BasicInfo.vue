@@ -17,7 +17,7 @@
     <a-spin :spinning="infoLoading">
       <a-table :dataSource="infoState.dataSource" :columns="columns">
         <template #action="{ record }">
-          <span>
+          <span v-if="record.code !== '999999'">
             <a @click="openDailyForm(record)"><PlusOutlined /></a>
             <a-divider type="vertical" />
             <a @click="editFundInfo(record)"><FormOutlined /></a>
@@ -101,7 +101,7 @@ function formatDate(d) {
 function buildDateList() {
   let dates = [];
   let now = new Date();
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 7; i++) {
     dates.push(formatDate(now));
     now.setDate(now.getDate() - 1);
   }

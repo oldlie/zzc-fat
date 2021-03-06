@@ -18,7 +18,7 @@ function createWindow() {
 
   let menu = Menu.getApplicationMenu();
   let menuItem = new MenuItem({
-    label: 'index.html',
+    label: 'Index.html',
     click: (menuItem, browserWindow, event) => {
       mainWindow.loadFile('./ui/index.html')
       return Promise.resolve();

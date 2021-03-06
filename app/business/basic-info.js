@@ -37,7 +37,7 @@ ipcMain.on('async-save-basic-info', (event, args) => {
     let m = now.getMonth() + 1;
     let y = now.getFullYear();
     amount = Number(amount) * 100;
-    
+
     const sql2 = `SELECT COUNT(funds_code) as c FROM f_info WHERE funds_code='${code}';`;
     sqliteDB.query(sql2).then(rows => {
         let count = rows[0]['c'];
@@ -100,7 +100,7 @@ ipcMain.on('async-save-basic-info', (event, args) => {
  * 2. 获取每个基金最近5个交易日的涨跌信息；
  */
 ipcMain.on('async-info', (event) => {
-    const sql = `SELECT funds_code,funds_alias,current_amount FROM f_info`;
+    const sql = `SELECT funds_code,funds_alias,current_amount FROM f_info ORDER BY funds_code ASC;`;
     sqliteDB.query(sql)
         .then(rows => {
             let data = [];
