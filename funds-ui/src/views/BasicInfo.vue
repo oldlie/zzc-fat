@@ -15,7 +15,15 @@
             <a-divider type="vertical" />
             <a @click="editFundInfo(record)"><FormOutlined /></a>
             <a-divider type="vertical" />
-            <a><DeleteOutlined style="color: #f5222d" /></a>
+            <a-popconfirm
+              title="谨慎选择删除，一旦执行将会删除所有与本基金相关数据?"
+              ok-text="是"
+              cancel-text="否"
+              @confirm="confirmDelete(record)"
+              @cancel="cancelDelete(record)"
+            >
+              <a><DeleteOutlined style="color: #f5222d" /></a>
+            </a-popconfirm>
           </span>
         </template>
       </a-table>
@@ -23,7 +31,11 @@
   </a-space>
 
   <a-modal v-model:visible="visible" title="添加记录" @ok="handleOk" :footer="null">
-    <FundDaliyLog :code="daliyState.code" :ymd="daliyState.ymd" :alias="daliyState.alias" />
+    <FundDaliyLog
+      :code="daliyState.code"
+      :ymd="daliyState.ymd"
+      :alias="daliyState.alias"
+    />
   </a-modal>
 </template>
 <script setup>
@@ -33,7 +45,7 @@ import { defineProps, reactive, ref, toRaw } from "vue";
 import { message } from "ant-design-vue";
 import { useRoute, useRouter } from "vue-router";
 
-import FundDaliyLog from '../components/FundDaliyLog.vue'
+import FundDaliyLog from "../components/FundDaliyLog.vue";
 
 const { ipcRenderer } = require("electron");
 const router = useRouter();
@@ -51,13 +63,13 @@ const infoLoading = ref(false);
 const columns = ref(buildColumns());
 
 const daliyState = reactive({
-  code: '',
-  ymd: '',
-  alias: ''
+  code: "",
+  ymd: "",
+  alias: "",
 });
 
 const infoState = reactive({
-  dataSource: []
+  dataSource: [],
 });
 
 // ====== Date calculate ====================
@@ -121,7 +133,7 @@ ipcRenderer.on("async-info-reply", (event, info, daliy) => {
         let found = false;
         for (let k4 in daliyChange) {
           let _daliy = daliyChange[k4];
-          let ymd = Number(_daliy['ymd']);
+          let ymd = Number(_daliy["ymd"]);
           if (_ymd === ymd) {
             _item[_ymd] = _daliy["funds_amount"];
             found = true;
@@ -153,9 +165,23 @@ const openDailyForm = (record) => {
   let ymdInt = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
   daliyState.code = record.code;
   daliyState.alias = record.alias;
-  daliyState.ymd = `${ymdInt}` ;
+  daliyState.ymd = `${ymdInt}`;
 };
 // ======= daily log ==========================
 
-
+const cancelDelete = (record) => {
+  // message.success("Click on Yes");
+};
+const confirmDelete = (record) => {
+  ipcRenderer.send('async-basic-info-delete', {code: record.code});
+};
+ipcRenderer.on('async-daliy-delete-reply', (event, args) => {
+  let {status, message} = args;
+  if (status === 0) {
+    success.success('已删除');
+    ipcRenderer.send('async-info-reply');
+  } else {
+    success.error(message);
+  }
+});
 </script>

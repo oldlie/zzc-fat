@@ -174,3 +174,29 @@ ipcMain.on('async-basic-info', (event, args) => {
             event.reply('async-basic-info-reply', result);
         })
 });
+
+/**
+ * 根据code删除一套基金的基本信息
+ * 凡是有funds_code字段的表都要删除
+ */
+ipcMain.on('async-basic-info-delete', (event, args) => {
+    const { code } = args;
+    const tables = ['f_info', 'f_opeartion', 'f_daliy_log', 'f_month_log', 'f_year_log', 'f_style'];
+    let prs = [];
+    let result = {
+        status: 0,
+        message: 'success'
+    };
+    for (let index in tables) {
+        prs.push(sqliteDB.query(`DELETE FROM ${tables[index]} WHERE funds_code='${code}';`));
+    }
+    Promise.all(prs)
+        .then((rows) => {
+            console.log(rows);
+            event.reply('async-basic-info-delete-reply', result);
+        })
+        .catch(err => {
+            result.message = err;
+            event.reply('async-basic-info-delete-reply', result)
+        });
+})

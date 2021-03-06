@@ -73,6 +73,7 @@ funds_amount BIGINT \
     const createFundsMonthLogTable = `CREATE TABLE IF NOT EXISTS f_month_log(\
 id INTEGER PRIMARY KEY AUTOINCREMENT, \
 ym INT, \
+funds_code CHAR(6), \
 funds_amount BIGINT \
 )`;
     
@@ -84,6 +85,7 @@ funds_amount BIGINT \
     const createFundsYearLogTable = `CREATE TABLE IF NOT EXISTS f_year_log(\
 id INTEGER PRIMARY KEY AUTOINCREMENT, \
 y INT, \
+funds_code CHAR(6), \
 funds_amount BIGINT \
 )`;
     
