@@ -7,6 +7,11 @@
 const { ipcMain } = require('electron');
 const { sqliteDB } = require('./sqlite_db');
 
+const response = {
+    status: 0,
+    msg: ''
+};
+
 /**
  * 记录或者更新某一天的的涨跌幅信息
  * 根据基金代码和日期来确定
@@ -109,4 +114,26 @@ ipcMain.on('async-calculate-all', (event, args) => {
             result.message = err;
             event.reply('async-calculate-all-reply', result);
         })
+});
+
+/**
+ * 提供基金日历需要的数据
+ */
+ipcMain.on('async-daliy-list', (event, args) => {
+    let { code, ymd} = args;
+    let year = Number(`${ymd}`.substr(0, 4));
+    let month = Number(`${ymd}`.substr(4, 2));
+    const sql = `SELECT funds_amount as 'amount', ymd as 'date' FROM f_daliy_log WHERE funds_code='${code}' AND y=${year} AND m=${month}`;
+    let pr = sqliteDB.query(sql);
+    const sql1 = `SELECT funds_alias as 'alias' FROM f_info WHERE funds_code='${code}'`;
+    let pr1 = sqliteDB.query(sql1);
+    Promise.all([pr1, pr]).then(result => {
+        console.log('xxxx===>', result);
+        response['data'] = result;
+        event.reply('async-daliy-list-reply', response);
+    }).catch(err => {
+        response.status = 1;
+        response.message = err.message;
+        event.reply('async-daliy-list-reply', response);
+    });
 });

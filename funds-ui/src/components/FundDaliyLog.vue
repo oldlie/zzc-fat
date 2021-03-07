@@ -38,6 +38,11 @@ export default defineComponent({
     alias: String,
     ymd: String,
   },
+  watch: {
+    ymd(nv) {
+      this.formState.ymd = moment(nv, "YYYYMMDD");
+    }
+  },
   data() {
     return {
       saveLoading: false,
@@ -84,7 +89,7 @@ export default defineComponent({
     ipcRenderer.on("async-daliy-save-reply", (event, msg) => {
       self.saveLoading = false;
       message.success("已保存");
-      ipcRenderer.send("async-info");
+      this.$emit('reload');
     });
   },
   methods: {
@@ -94,7 +99,6 @@ export default defineComponent({
       this.formRef
         .validate()
         .then(() => {
-          console.log("send async-daliy-save");
 
           try {
             ipcRenderer.send("async-daliy-save", {
@@ -105,7 +109,6 @@ export default defineComponent({
           } catch (err) {
             console.log("exception-->", err);
           }
-          console.log("send: async-daliy-save");
         })
         .catch(() => (this.saveLoading = false));
     },

@@ -40,6 +40,10 @@
           <span v-if="record.code !== '999999'">
             {{ record.alias }}
             <a-divider type="vertical" />
+            <router-link :to="`/calendar?code=${record.code}`"
+              ><CalendarOutlined
+            /></router-link>
+            <a-divider type="vertical" />
             <a @click="editFundInfo(record)"><FormOutlined /></a>
             <a-divider type="vertical" />
             <a-popconfirm
@@ -62,6 +66,7 @@
       :code="daliyState.code"
       :ymd="daliyState.ymd"
       :alias="daliyState.alias"
+      @reload="reload"
     />
   </a-modal>
 
@@ -73,6 +78,7 @@
 import { defineComponent } from "vue";
 import {
   CalculatorOutlined,
+  CalendarOutlined,
   DeleteOutlined,
   FormOutlined,
   PlusOutlined,
@@ -235,5 +241,9 @@ const openCalculateForm = () => {
 
 const onSearch = () => {
   ipcRenderer.send("async-info", { code: searchValue.value });
+};
+
+const reload = () => {
+  ipcRenderer.send("async-info");
 };
 </script>

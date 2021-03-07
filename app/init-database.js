@@ -27,23 +27,9 @@ current_amount BIGINT \
 
     sqliteDB.createTable(createFundsBasicInfoTable);
 
-    /**
-     * Funds operation:
-     * operation:买入，卖出，分红,差额,涨跌
-     * opt_amount:本次操作花费的金额
-     */
-    const createFundsOperationTable = `CREATE TABLE IF NOT EXISTS f_operation(\
-id INTEGER PRIMARY KEY AUTOINCREMENT, \
-d INT, \
-m INT, \
-y INT, \
-operation INT, \
-funds_code CHAR(6), \
-opt_amount BIGINT \
-)`;
-
-    sqliteDB.createTable(createFundsOperationTable);
-
+    const data999999 = [ '999999', 2021, 3, 7, '总收益', '总收益', 0, 0 ];
+    const insertFund999999 = `INSERT INTO f_info values (?,?,?,?,?,?,?,?)`;
+    sqliteDB.insert(insertFund999999, data999999);
 
     /**
      * Funds daliy log
@@ -51,6 +37,7 @@ opt_amount BIGINT \
      * funds_cal: 根据幅度的计算值
      * funds_fixed: 手动录入的修正值(默认填写计算值)
      * funds_amount: 今日基金金额（f_info.current_amount + f_daliy_log.funds_fixed）
+     * log_type： 0，每日金额涨跌类型；1，买入；2，卖出；3，分红；
      */
     const createFundsDaliyLogTable = `CREATE TABLE IF NOT EXISTS f_daliy_log(\
 id INTEGER PRIMARY KEY AUTOINCREMENT, \
@@ -62,7 +49,8 @@ funds_code CHAR(6), \
 funds_change BIGINT, \
 funds_cal BIGINT, \
 funds_fixed BIGINT, \
-funds_amount BIGINT \
+funds_amount BIGINT, \
+log_type INT DEFAULT 0
 )`;
 
     sqliteDB.createTable(createFundsDaliyLogTable);

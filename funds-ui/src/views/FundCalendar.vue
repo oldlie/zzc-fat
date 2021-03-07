@@ -1,0 +1,118 @@
+<template>
+  <a-space direction="vertical" style="width: 100%">
+    <a-page-header style="border: 1px solid rgb(235, 237, 240)" title="基金日历" />
+
+    <a-calendar v-model:value="value" @select="openPlusForm">
+      <template #dateCellRender="{ current: value }">
+        <CalendarLabel :amount="getListData(value)['amount']" :color="getListData(value)['color']" />
+      </template>
+    </a-calendar>
+  </a-space>
+
+  <a-modal v-model:visible="visible" title="添加记录" :footer="null">
+    <FundDaliyLog
+      :code="daliyState.code"
+      :ymd="daliyState.ymd"
+      :alias="daliyState.alias"
+      @reload="reload"
+    />
+  </a-modal>
+</template>
+<script lang="ts">
+import { defineComponent } from "vue";
+import {
+  CalculatorOutlined,
+  CalendarOutlined,
+  DeleteOutlined,
+  FormOutlined,
+  PlusOutlined,
+} from "@ant-design/icons-vue";
+import { defineProps, reactive, ref, toRaw } from "vue";
+import { message } from "ant-design-vue";
+import { useRoute, useRouter } from "vue-router";
+import moment from "moment";
+import CalendarLabel from "../components/CalendarLabel.vue";
+import FundDaliyLog from "../components/FundDaliyLog.vue";
+
+const { ipcRenderer } = require("electron");
+const router = useRouter();
+
+export default defineComponent({
+  data() {
+    return {
+      value: moment().format("YYYYMMDD"),
+      visible: false,
+    };
+  },
+  components: {
+    CalendarLabel,
+    FundDaliyLog,
+  },
+  setup() {
+    const route = useRoute();
+    const fundState = reactive({
+      info: {},
+      data: {},
+    });
+    const daliyState = reactive({
+      code: "",
+      ymd: "",
+      alias: "",
+    });
+    message.info(route.query.code);
+    let code = route.query.code;
+    let ymd = moment().format("YYYYMMDD");
+    ipcRenderer.send("async-daliy-list", { code: code, ymd: ymd });
+    ipcRenderer.on("async-daliy-list-reply", (event, response) => {
+      const { status, msg, data } = response;
+      if (status === 0) {
+        let amountList = data[1];
+        let _data = {};
+        for (let index in amountList) {
+          let item = amountList[index];
+          let _amount = `${item["amount"]}`;
+          let _length = _amount.length - 2;
+          _data[item["date"]] = `${_amount.substring(0, _length)}.${_amount.substring(
+            _length
+          )}`;
+        }
+        fundState.info = {
+          code: code,
+          alias: data[0][0]["alias"],
+        };
+        fundState.data = _data;
+      } else {
+        message.error(msg);
+      }
+    });
+
+    return {
+      daliyState,
+      fundState,
+    };
+  },
+  mounted() {},
+  methods: {
+    openPlusForm(value: Moment): void {
+      let info = toRaw(this.fundState.info);
+      this.daliyState.code = info.code;
+      this.daliyState.ymd = value.format("YYYYMMDD");
+      this.daliyState.alias = info.alias;
+      this.visible = true;
+    },
+    reload(): void {
+      let info = toRaw(this.fundState.info);
+      ipcRenderer.send("async-daliy-list", {
+        code: info.code,
+        ymd: moment().format("YYYYMMDD"),
+      });
+    },
+    getListData(value: Moment): Any {
+      let temp = toRaw(this.fundState.data);
+      let amount = temp[value.format("YYYYMMDD")];
+      let color = Number(amount) >= 0 ? "#f5222d" : "#389e0d";
+      return { amount, color };
+    },
+  },
+});
+</script>
