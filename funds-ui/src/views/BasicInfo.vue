@@ -15,6 +15,7 @@
       >
       -->
 
+      <a-divider type="vertical" />
       <a-input-search
         v-model:value="searchValue"
         placeholder="输入基金代码"
@@ -28,6 +29,16 @@
         <template #action="{ record }">
           <span v-if="record.code !== '999999'">
             <a @click="openDailyForm(record)"><PlusOutlined /></a>
+          </span>
+        </template>
+        <template #code="{ record }">
+          <span v-if="record.code !== '999999'">
+            {{ record.code }}
+          </span>
+        </template>
+        <template #alias="{ record }">
+          <span v-if="record.code !== '999999'">
+            {{ record.alias }}
             <a-divider type="vertical" />
             <a @click="editFundInfo(record)"><FormOutlined /></a>
             <a-divider type="vertical" />
@@ -88,7 +99,7 @@ const visible = ref(false);
 const infoLoading = ref(false);
 const columns = ref(buildColumns());
 const calculateVisible = ref(false);
-const searchValue = ref('');
+const searchValue = ref("");
 
 const daliyState = reactive({
   code: "",
@@ -121,9 +132,9 @@ function buildDateList() {
 
 function buildColumns() {
   let columns = [];
-  columns.push({ title: "操作", dataIndex: "action", slots: { customRender: "action" } });
-  columns.push({ title: "代码", dataIndex: "code", key: "code" });
-  columns.push({ title: "基金", dataIndex: "alias", key: "title" });
+  columns.push({ title: "", dataIndex: "action", slots: { customRender: "action" } });
+  columns.push({ title: "代码", dataIndex: "code", slots: { customRender: "code" } });
+  columns.push({ title: "基金", dataIndex: "alias", slots: { customRender: "alias" } });
   let dates = buildDateList();
   for (let index in dates) {
     let item = dates[index];
@@ -223,6 +234,6 @@ const openCalculateForm = () => {
 };
 
 const onSearch = () => {
-  ipcRenderer.send("async-info", {code: searchValue.value});
-}
+  ipcRenderer.send("async-info", { code: searchValue.value });
+};
 </script>
