@@ -36,7 +36,12 @@ ipcMain.on('async-save-basic-info', (event, args) => {
     let d = now.getDate();
     let m = now.getMonth() + 1;
     let y = now.getFullYear();
-    amount = Number(amount) * 100;
+
+    if (amount.indexOf('.') > 0) {
+        amount = amount.replace('.', '');
+    } else {
+        amount = amount + '00';
+    }
 
     const sql2 = `SELECT COUNT(funds_code) as c FROM f_info WHERE funds_code='${code}';`;
     sqliteDB.query(sql2).then(rows => {

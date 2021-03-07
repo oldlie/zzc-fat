@@ -19,7 +19,11 @@ const response = {
 ipcMain.on('async-daliy-save', (event, args) => {
     let { code, ymd, amount } = args;
 
-    amount = Number(amount) * 100;
+    if (amount.indexOf('.') > 0) {
+        amount = amount.replace('.', '');
+    } else {
+        amount = amount + '00';
+    }
 
     const countSql = `SELECT COUNT(id) as c FROM f_daliy_log WHERE ymd=${ymd} AND funds_code='${code}';`;
     try {
