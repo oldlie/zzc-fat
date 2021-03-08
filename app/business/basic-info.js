@@ -137,7 +137,7 @@ ipcMain.on('async-info', (event, args) => {
         .then(data => {
             let pr = [];
             for (let index in data) {
-                let sql = `SELECT funds_code,funds_amount,ymd FROM f_daliy_log WHERE funds_code='${data[index]['code']}' ORDER BY ymd DESC LIMIT 5`;
+                let sql = `SELECT funds_code,funds_amount,ymd FROM f_daliy_log WHERE funds_code='${data[index]['code']}' AND log_type=0 ORDER BY ymd DESC LIMIT 5`;
                 pr.push(sqliteDB.query(sql));
             }
             Promise.all(pr)

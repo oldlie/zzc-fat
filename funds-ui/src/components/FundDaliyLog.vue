@@ -16,6 +16,14 @@
       <a-input v-model:value="formState.amount" type="text" autocomplete="off" />
     </a-form-item>
 
+    <a-form-item label="记录类型" name="logType">
+      <a-radio-group v-model:value="formState.logType">
+        <a-radio v-for="(item, key) in logTypeList" :value="item.value">{{
+          item.label
+        }}</a-radio>
+      </a-radio-group>
+    </a-form-item>
+
     <a-form-item>
       <a-button type="primary" @click="onSubmit" :loading="saveLoading"
         ><template #icon><SaveOutlined /></template>保存</a-button
@@ -31,6 +39,12 @@ import { message } from "ant-design-vue";
 import moment from "moment";
 
 const { ipcRenderer } = require("electron");
+const logTypeList = [
+  { value: 0, label: "日常" },
+  { value: 1, label: "买入" },
+  { value: 2, label: "卖出" },
+  { value: 3, label: "分红" },
+];
 
 export default defineComponent({
   props: {
@@ -41,11 +55,12 @@ export default defineComponent({
   watch: {
     ymd(nv) {
       this.formState.ymd = moment(nv, "YYYYMMDD");
-    }
+    },
   },
   data() {
     return {
       saveLoading: false,
+      logTypeList,
     };
   },
   setup(props) {
@@ -77,6 +92,7 @@ export default defineComponent({
     const formState = reactive({
       ymd: moment(_ymd, "YYYYMMDD"),
       amount: "",
+      logType: 0,
     });
     return {
       formRef,
@@ -89,7 +105,7 @@ export default defineComponent({
     ipcRenderer.on("async-daliy-save-reply", (event, msg) => {
       self.saveLoading = false;
       message.success("已保存");
-      this.$emit('reload');
+      this.$emit("reload");
     });
   },
   methods: {
@@ -99,12 +115,12 @@ export default defineComponent({
       this.formRef
         .validate()
         .then(() => {
-
           try {
             ipcRenderer.send("async-daliy-save", {
               code: this.code,
               ymd: _v.ymd.format("YYYYMMDD"),
               amount: _v.amount,
+              logType: _v.logType
             });
           } catch (err) {
             console.log("exception-->", err);

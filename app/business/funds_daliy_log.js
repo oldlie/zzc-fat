@@ -17,7 +17,7 @@ const response = {
  * 根据基金代码和日期来确定
  */
 ipcMain.on('async-daliy-save', (event, args) => {
-    let { code, ymd, amount } = args;
+    let { code, ymd, amount, logType } = args;
 
     if (amount.indexOf('.') > 0) {
         amount = amount.replace('.', '');
@@ -40,11 +40,11 @@ ipcMain.on('async-daliy-save', (event, args) => {
                     .finally(() => calculateAll(ymd));
                 } else {
                     // 插入
-                    const insertSql = `INSERT INTO f_daliy_log (funds_code, ymd, y, m, d, funds_amount) values ($code, $ymd, $y, $m, $d, $amount)`;
+                    const insertSql = `INSERT INTO f_daliy_log (funds_code, ymd, y, m, d, funds_amount, log_type) values ($code, $ymd, $y, $m, $d, $amount, $logType)`;
                     let y = Number(ymd.substr(0, 4));
                     let m = Number(ymd.substr(4, 2));
                     let d = Number(ymd.substr(6, 2));
-                    let data = { $code: code, $ymd: ymd, $y: y, $m: m, $d: d, $amount: amount };
+                    let data = { $code: code, $ymd: ymd, $y: y, $m: m, $d: d, $amount: amount, $logType: logType };
                     sqliteDB.insert(insertSql, data)
                     .then(id => event.reply('async-daliy-save-reply', id))
                     .catch(err => console.log('save2', err))
@@ -127,7 +127,7 @@ ipcMain.on('async-daliy-list', (event, args) => {
     let { code, ymd} = args;
     let year = Number(`${ymd}`.substr(0, 4));
     let month = Number(`${ymd}`.substr(4, 2));
-    const sql = `SELECT funds_amount as 'amount', ymd as 'date' FROM f_daliy_log WHERE funds_code='${code}' AND y=${year} AND m=${month}`;
+    const sql = `SELECT funds_amount as 'amount', ymd as 'date' FROM f_daliy_log WHERE funds_code='${code}' AND y=${year} AND m=${month} AND log_type=0 ORDER BY ymd ASC`;
     let pr = sqliteDB.query(sql);
     const sql1 = `SELECT funds_alias as 'alias' FROM f_info WHERE funds_code='${code}'`;
     let pr1 = sqliteDB.query(sql1);

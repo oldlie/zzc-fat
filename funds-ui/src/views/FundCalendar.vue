@@ -100,7 +100,6 @@ const router = useRouter();
 export default defineComponent({
   data() {
     return {
-      value: moment().format("YYYYMMDD"),
       visible: false,
     };
   },
@@ -111,6 +110,7 @@ export default defineComponent({
     FundDaliyLog,
   },
   setup() {
+    const value = ref(moment().format("YYYYMMDD"));
     const route = useRoute();
     const fundState = reactive({
       info: {},
@@ -122,7 +122,7 @@ export default defineComponent({
       alias: "",
     });
     let code = route.query.code;
-    let ymd = moment().format("YYYYMMDD");
+    let ymd = value.value;
     ipcRenderer.send("async-daliy-list", { code: code, ymd: ymd });
     ipcRenderer.on("async-daliy-list-reply", (event, response) => {
       const { status, msg, data } = response;
@@ -153,6 +153,7 @@ export default defineComponent({
     return {
       daliyState,
       fundState,
+      value
     };
   },
   mounted() {},
