@@ -131,7 +131,14 @@ ipcMain.on('async-daliy-list', (event, args) => {
     let pr = sqliteDB.query(sql);
     const sql1 = `SELECT funds_alias as 'alias' FROM f_info WHERE funds_code='${code}'`;
     let pr1 = sqliteDB.query(sql1);
-    Promise.all([pr1, pr]).then(result => {
+    let sql2 = `SELECT COUNT(id) as 'up' FROM f_daliy_log WHERE funds_code='${code}' AND y=${year} AND m=${month} AND funds_amount >= 0`;
+    let pr2 = sqliteDB.query(sql2);
+    let sql3 = `SELECT COUNT(id) as 'down' FROM f_daliy_log WHERE funds_code='${code}' AND y=${year} AND m=${month} AND funds_amount < 0`;
+    let pr3 = sqliteDB.query(sql3);
+    let sql4 = `SELECT SUM(funds_amount) as 'total' FROM f_daliy_log WHERE funds_code='${code}' AND y=${year} AND m=${month}`;
+    let pr4 = sqliteDB.query(sql4);
+
+    Promise.all([pr1, pr, pr2, pr3, pr4]).then(result => {
         console.log('xxxx===>', result);
         response['data'] = result;
         event.reply('async-daliy-list-reply', response);

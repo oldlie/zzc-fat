@@ -1,10 +1,68 @@
 <template>
   <a-space direction="vertical" style="width: 100%">
-    <a-page-header style="border: 1px solid rgb(235, 237, 240)" title="基金日历" />
+    <a-page-header
+      style="border: 1px solid rgb(235, 237, 240)"
+      title="基金日历"
+      :sub-title="fundState.info.alias"
+    />
+
+    <div>
+      <a-row :gutter="24">
+        <a-col :span="8">
+          <a-card>
+            <a-statistic
+              title="月收益"
+              :value="fundState.info.total"
+              :precision="2"
+              prefix="￥"
+              :value-style="{ color: fundState.info.total > 0 ? '#cf1322' : '#3f8600' }"
+              class="demo-class"
+            >
+              <template #prefix>
+                <arrow-down-outlined />
+              </template>
+            </a-statistic>
+          </a-card>
+        </a-col>
+        <a-col :span="8">
+          <a-card>
+            <a-statistic
+              title="上涨天数"
+              :value="fundState.info.upDates"
+              :precision="0"
+              :value-style="{ color: '#cf1322' }"
+              style="margin-right: 50px"
+            >
+              <template #prefix>
+                <arrow-up-outlined />
+              </template>
+            </a-statistic>
+          </a-card>
+        </a-col>
+        <a-col :span="8">
+          <a-card>
+            <a-statistic
+              title="下跌天数"
+              :value="fundState.info.downDates"
+              :precision="0"
+              class="demo-class"
+              :value-style="{ color: '#3f8600' }"
+            >
+              <template #prefix>
+                <arrow-down-outlined />
+              </template>
+            </a-statistic>
+          </a-card>
+        </a-col>
+      </a-row>
+    </div>
 
     <a-calendar v-model:value="value" @select="openPlusForm">
       <template #dateCellRender="{ current: value }">
-        <CalendarLabel :amount="getListData(value)['amount']" :color="getListData(value)['color']" />
+        <CalendarLabel
+          :amount="getListData(value)['amount']"
+          :color="getListData(value)['color']"
+        />
       </template>
     </a-calendar>
   </a-space>
@@ -21,6 +79,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import {
+  ArrowUpOutlined,
+  ArrowDownOutlined,
   CalculatorOutlined,
   CalendarOutlined,
   DeleteOutlined,
@@ -45,6 +105,8 @@ export default defineComponent({
     };
   },
   components: {
+    ArrowUpOutlined,
+    ArrowDownOutlined,
     CalendarLabel,
     FundDaliyLog,
   },
@@ -59,7 +121,6 @@ export default defineComponent({
       ymd: "",
       alias: "",
     });
-    message.info(route.query.code);
     let code = route.query.code;
     let ymd = moment().format("YYYYMMDD");
     ipcRenderer.send("async-daliy-list", { code: code, ymd: ymd });
@@ -79,6 +140,9 @@ export default defineComponent({
         fundState.info = {
           code: code,
           alias: data[0][0]["alias"],
+          upDates: data[2][0]["up"],
+          downDates: data[3][0]["down"],
+          total: data[4][0]["total"] / 100,
         };
         fundState.data = _data;
       } else {

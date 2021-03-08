@@ -70,7 +70,7 @@ export default defineComponent({
       ],
       amount: [
         { validator: validateAmount, trigger: "change" },
-        { required: true, message: "请选择一个年月日", trigger: "blur" },
+        { required: true, message: "请输入收益", trigger: "blur" },
       ],
     };
     let _ymd = props.ymd;
