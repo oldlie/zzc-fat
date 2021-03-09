@@ -24,7 +24,7 @@
       </a-form-item>
       <a-form-item has-feedback label="基金风格" name="style">
         <a-checkbox-group v-model:value="formState.style" style="width: 600px">
-          <template v-for="item in stylePool">
+          <template v-for="item in stylePool.value">
             <a-checkbox :value="item.id" name="style">{{ item.title }}</a-checkbox>
           </template>
         </a-checkbox-group>
@@ -50,38 +50,55 @@ const route = useRoute();
 const code = route.query.code;
 
 const formRef = ref();
-const stylePool = ref([]);
+const stylePool = reactive({
+  value: [],
+});
 const saveLoading = ref(false);
 
 const formState = reactive({
-  code: code ? code : '',
+  code: code ? code : "",
   title: "",
   alias: "",
   amount: "",
   style: [1, 2],
 });
 
+
 if (code) {
-  ipcRenderer.send('async-basic-info', {code: code});
-  ipcRenderer.on('async-basic-info-reply', (event, arg) => {
-    console.log('basic info reply:', arg);
-    const {status, data} = arg;
-    if (status === 0) {
-      let amount = `${data['amount']}`;
-      formState.title = data['title'];  
-      formState.alias = data['alias'];
-      formState.amount = `${amount.substring(0, amount.length - 2)}.${amount.substring(amount.length - 2)}`;
-      formState.style = data['styles'];
-    } else {
-      message.error(data);
-    }
-  });
+  ipcRenderer.send("async-basic-info", { code: code });
+  if (!ER.events["async-basic-info-reply"]) {
+    ER.events["async-basic-info-reply"] = true;
+    ipcRenderer.on("async-basic-info-reply", (event, arg) => {
+      console.log("basic info reply:", arg);
+      const { status, data } = arg;
+      if (status === 0) {
+        let amount = `${data["amount"]}`;
+        formState.title = data["title"];
+        formState.alias = data["alias"];
+        formState.amount = `${amount.substring(0, amount.length - 2)}.${amount.substring(
+          amount.length - 2
+        )}`;
+        formState.style = data["styles"];
+      } else {
+        message.error(data);
+      }
+    });
+  }
 }
 
+
 ipcRenderer.send("async-load-style-pool");
-ipcRenderer.on("async-load-style-pool-reply", (event, arg) => {
-  stylePool.value = arg;
-});
+if (ER.events["async-load-style-pool-reply"]) {
+  ipcRenderer.removeListener("async-load-style-pool-reply");
+  ipcRenderer.on("async-load-style-pool-reply", (event, arg) => {
+    stylePool.value = arg;
+  });
+} else {
+  ER.events["async-load-style-pool-reply"] = true;
+  ipcRenderer.on("async-load-style-pool-reply", (event, arg) => {
+    stylePool.value = arg;
+  });
+}
 
 let checkFundsCode = async (rule, value) => {
   const regex = /^\d{6}$/;
@@ -120,6 +137,7 @@ function onSubmit() {
       saveLoading.value = false;
     });
 }
+
 ipcRenderer.on("async-save-basic-info-reply", (event, args) => {
   saveLoading.value = false;
   message.success("已保存");

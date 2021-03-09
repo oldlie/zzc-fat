@@ -152,56 +152,60 @@ function buildColumns() {
 // ======= load inforamtion ==================
 infoLoading.value = true;
 ipcRenderer.send("async-info");
-ipcRenderer.on("async-info-reply", (event, info, daliy) => {
-  console.log("info===>", info, daliy);
+if (!ER.events["async-info-reply"]) {
+  ER.events["async-info-reply"];
+  ipcRenderer.on("async-info-reply", (event, info, daliy) => {
+    console.log("info===>", info, daliy);
 
-  let data = [];
-  for (let key in info) {
-    let bi = info[key];
-    let code = bi["code"];
-    let _item = {
-      code,
-      alias: bi["alias"],
-    };
-    for (let k2 in daliy) {
-      let changes = daliy[k2];
-      if (!changes || changes.length <= 0) {
-        continue;
-      }
-      let daliyChange = changes.filter((x) => x["funds_code"] === code);
-      if (!daliyChange || daliyChange.length <= 0) {
-        continue;
-      }
-      let dates = buildDateList();
-      for (let k3 in dates) {
-        let _ymd = dates[k3];
-        let found = false;
-        for (let k4 in daliyChange) {
-          let _daliy = daliyChange[k4];
-          let ymd = Number(_daliy["ymd"]);
-          let amount = `${_daliy["funds_amount"]}`;
-          if (amount !== "0") {
-            let _l = amount.length - 2;
-            amount = `${amount.substring(0, _l)}.${amount.substring(_l)}`;
+    let data = [];
+    for (let key in info) {
+      let bi = info[key];
+      let code = bi["code"];
+      let _item = {
+        code,
+        alias: bi["alias"],
+      };
+      for (let k2 in daliy) {
+        let changes = daliy[k2];
+        if (!changes || changes.length <= 0) {
+          continue;
+        }
+        let daliyChange = changes.filter((x) => x["funds_code"] === code);
+        if (!daliyChange || daliyChange.length <= 0) {
+          continue;
+        }
+        let dates = buildDateList();
+        for (let k3 in dates) {
+          let _ymd = dates[k3];
+          let found = false;
+          for (let k4 in daliyChange) {
+            let _daliy = daliyChange[k4];
+            let ymd = Number(_daliy["ymd"]);
+            let amount = `${_daliy["funds_amount"]}`;
+            if (amount !== "0") {
+              let _l = amount.length - 2;
+              amount = `${amount.substring(0, _l)}.${amount.substring(_l)}`;
+            }
+            if (_ymd === ymd) {
+              _item[_ymd] = amount;
+              found = true;
+              break;
+            }
           }
-          if (_ymd === ymd) {
-            _item[_ymd] = amount;
-            found = true;
-            break;
+          if (!found) {
+            _item[_ymd] = 0;
           }
         }
-        if (!found) {
-          _item[_ymd] = 0;
-        }
       }
+
+      data.push(_item);
     }
+    console.log(data);
+    infoState.dataSource = data;
+    infoLoading.value = false;
+  });
+}
 
-    data.push(_item);
-  }
-  console.log(data);
-  infoState.dataSource = data;
-  infoLoading.value = false;
-});
 // ======= ./ load inforamtion ================
 
 // ======= daily log ==========================
@@ -225,15 +229,18 @@ const cancelDelete = (record) => {
 const confirmDelete = (record) => {
   ipcRenderer.send("async-basic-info-delete", { code: record.code });
 };
-ipcRenderer.on("async-daliy-delete-reply", (event, args) => {
-  let { status, msg: message } = args;
-  if (status === 0) {
-    message.success("已删除");
-    ipcRenderer.send("async-info-reply");
-  } else {
-    message.error(msg);
-  }
-});
+if (!ER.events["async-basic-info-delete-reply"]) {
+  ER.events["async-basic-info-delete-reply"] = true;
+  ipcRenderer.on("async-basic-info-delete-reply", (event, args) => {
+    let { status } = args;
+    if (status === 0) {
+      message.success("已删除");
+      reload();
+    } else {
+      message.error(args.message);
+    }
+  });
+}
 
 const openCalculateForm = () => {
   calculateVisible.value = true;

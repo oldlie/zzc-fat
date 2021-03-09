@@ -197,7 +197,7 @@ ipcMain.on('async-basic-info', (event, args) => {
  */
 ipcMain.on('async-basic-info-delete', (event, args) => {
     const { code } = args;
-    const tables = ['f_info', 'f_opeartion', 'f_daliy_log', 'f_month_log', 'f_year_log', 'f_style'];
+    const tables = ['f_info', 'f_daliy_log', 'f_month_log', 'f_year_log', 'f_style'];
     let prs = [];
     let result = {
         status: 0,
@@ -208,7 +208,6 @@ ipcMain.on('async-basic-info-delete', (event, args) => {
     }
     Promise.all(prs)
         .then((rows) => {
-            console.log(rows);
             event.reply('async-basic-info-delete-reply', result);
         })
         .catch(err => {
