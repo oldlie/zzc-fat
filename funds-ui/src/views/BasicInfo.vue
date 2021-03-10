@@ -152,59 +152,57 @@ function buildColumns() {
 // ======= load inforamtion ==================
 infoLoading.value = true;
 ipcRenderer.send("async-info");
-if (!ER.events["async-info-reply"]) {
-  ER.events["async-info-reply"];
-  ipcRenderer.on("async-info-reply", (event, info, daliy) => {
-    console.log("info===>", info, daliy);
+ipcRenderer.removeAllListeners("async-info-reply");
+ipcRenderer.on("async-info-reply", (event, info, daliy) => {
+  console.log("info===>", info, daliy);
 
-    let data = [];
-    for (let key in info) {
-      let bi = info[key];
-      let code = bi["code"];
-      let _item = {
-        code,
-        alias: bi["alias"],
-      };
-      for (let k2 in daliy) {
-        let changes = daliy[k2];
-        if (!changes || changes.length <= 0) {
-          continue;
-        }
-        let daliyChange = changes.filter((x) => x["funds_code"] === code);
-        if (!daliyChange || daliyChange.length <= 0) {
-          continue;
-        }
-        let dates = buildDateList();
-        for (let k3 in dates) {
-          let _ymd = dates[k3];
-          let found = false;
-          for (let k4 in daliyChange) {
-            let _daliy = daliyChange[k4];
-            let ymd = Number(_daliy["ymd"]);
-            let amount = `${_daliy["funds_amount"]}`;
-            if (amount !== "0") {
-              let _l = amount.length - 2;
-              amount = `${amount.substring(0, _l)}.${amount.substring(_l)}`;
-            }
-            if (_ymd === ymd) {
-              _item[_ymd] = amount;
-              found = true;
-              break;
-            }
+  let data = [];
+  for (let key in info) {
+    let bi = info[key];
+    let code = bi["code"];
+    let _item = {
+      code,
+      alias: bi["alias"],
+    };
+    for (let k2 in daliy) {
+      let changes = daliy[k2];
+      if (!changes || changes.length <= 0) {
+        continue;
+      }
+      let daliyChange = changes.filter((x) => x["funds_code"] === code);
+      if (!daliyChange || daliyChange.length <= 0) {
+        continue;
+      }
+      let dates = buildDateList();
+      for (let k3 in dates) {
+        let _ymd = dates[k3];
+        let found = false;
+        for (let k4 in daliyChange) {
+          let _daliy = daliyChange[k4];
+          let ymd = Number(_daliy["ymd"]);
+          let amount = `${_daliy["funds_amount"]}`;
+          if (amount !== "0") {
+            let _l = amount.length - 2;
+            amount = `${amount.substring(0, _l)}.${amount.substring(_l)}`;
           }
-          if (!found) {
-            _item[_ymd] = 0;
+          if (_ymd === ymd) {
+            _item[_ymd] = amount;
+            found = true;
+            break;
           }
+        }
+        if (!found) {
+          _item[_ymd] = 0;
         }
       }
-
-      data.push(_item);
     }
-    console.log(data);
-    infoState.dataSource = data;
-    infoLoading.value = false;
-  });
-}
+
+    data.push(_item);
+  }
+  console.log(data);
+  infoState.dataSource = data;
+  infoLoading.value = false;
+});
 
 // ======= ./ load inforamtion ================
 
