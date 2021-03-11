@@ -57,7 +57,7 @@
       </a-row>
     </div>
 
-    <a-calendar v-model:value="value" @select="openPlusForm">
+    <a-calendar v-model:value="value" @select="openPlusForm" @change="onChange">
       <template #dateCellRender="{ current: value }">
         <CalendarLabel
           :amount="getListData(value)['amount']"
@@ -90,7 +90,9 @@ import {
 import { defineProps, reactive, ref, toRaw } from "vue";
 import { message } from "ant-design-vue";
 import { useRoute, useRouter } from "vue-router";
+import "moment/dist/locale/zh-cn";
 import moment from "moment";
+moment.locale("zh-cn");
 import CalendarLabel from "../components/CalendarLabel.vue";
 import FundDaliyLog from "../components/FundDaliyLog.vue";
 
@@ -124,36 +126,40 @@ export default defineComponent({
     let code = route.query.code;
     let ymd = value.value;
     ipcRenderer.send("async-daliy-list", { code: code, ymd: ymd });
-    ipcRenderer.on("async-daliy-list-reply", (event, response) => {
-      const { status, msg, data } = response;
-      if (status === 0) {
-        let amountList = data[1];
-        let _data = {};
-        for (let index in amountList) {
-          let item = amountList[index];
-          let _amount = `${item["amount"]}`;
-          let _length = _amount.length - 2;
-          _data[item["date"]] = `${_amount.substring(0, _length)}.${_amount.substring(
-            _length
-          )}`;
-        }
-        fundState.info = {
-          code: code,
-          alias: data[0][0]["alias"],
-          upDates: data[2][0]["up"],
-          downDates: data[3][0]["down"],
-          total: data[4][0]["total"] / 100,
-        };
-        fundState.data = _data;
-      } else {
-        message.error(msg);
-      }
-    });
 
+    if (!ER.events["async-daliy-list-reply"]) {
+      ER.events["async-daliy-list-reply"] = true;
+      ipcRenderer.on("async-daliy-list-reply", (event, response) => {
+        const { status, msg, data } = response;
+        if (status === 0) {
+          let amountList = data[1];
+          let _data = {};
+          for (let index in amountList) {
+            let item = amountList[index];
+            let _amount = `${item["amount"]}`;
+            let _length = _amount.length - 2;
+            _data[item["date"]] = `${_amount.substring(0, _length)}.${_amount.substring(
+              _length
+            )}`;
+          }
+          fundState.info = {
+            code: code,
+            alias: data[0][0]["alias"],
+            upDates: data[2][0]["up"],
+            downDates: data[3][0]["down"],
+            total: data[4][0]["total"] / 100,
+          };
+          fundState.data = _data;
+        } else {
+          message.error(msg);
+        }
+      });
+    }
+    
     return {
       daliyState,
       fundState,
-      value
+      value,
     };
   },
   mounted() {},
@@ -177,6 +183,10 @@ export default defineComponent({
       let amount = temp[value.format("YYYYMMDD")];
       let color = Number(amount) >= 0 ? "#f5222d" : "#389e0d";
       return { amount, color };
+    },
+    onChange(value: Moment): void {
+      let ymd = value.format("YYYYMMDD");
+      ipcRenderer.send("async-daliy-list", { code: this.fundState.info.code, ymd: ymd });
     },
   },
 });
