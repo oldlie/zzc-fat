@@ -11,7 +11,9 @@
         <a-menu-item key="1">
           <router-link to="/"> <HomeOutlined />概况 </router-link>
         </a-menu-item>
-        <a-menu-item key="2"><StockOutlined />分析</a-menu-item>
+        <a-menu-item key="2">
+          <router-link to="/analysis"> <StockOutlined />分析 </router-link>
+        </a-menu-item>
       </a-menu>
     </a-layout-header>
     <a-layout-content :style="{ background: '#fff', padding: '48px', margin: 0, minHeight: '600px' }">
