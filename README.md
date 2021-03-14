@@ -4,20 +4,26 @@
 zzc基金分析工具
 
 #### 软件架构
-软件架构说明
+1.  UI: vue3
+2.  Backend: Electron
+3.  前后端采用事件的方式通信
 
 
 #### 安装教程
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1.  去到fund-ui执行```npm install```安装依赖
+2.  执行```npm run build```将前端项目编译到app的指定文件夹
+3.  去到app文件夹执行```npm install```安装依赖
+4.  执行```npm start```启动程序
 
 #### 使用说明
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1.  基本信息
+    ![基本信息](./docs/images/2021-03-14_15-48.png)
+2.  基金日历
+    ![基金日历](./docs/images/2021-03-14_15-48_1.png)
+3.  基金分析
+    ![基金分析](./docs/images/2021-03-14_15-51.png)
 
 #### 参与贡献
 

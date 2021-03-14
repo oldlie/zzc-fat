@@ -82,22 +82,20 @@ export default defineComponent({
       height: 300,
     });
 
-    if (!ER.events["async-daliy-list-by-code-and-date-range-reply"]) {
-      ER.events["async-daliy-list-by-code-and-date-range-reply"] = true;
-      ipcRenderer.on("async-daliy-list-by-code-and-date-range-reply", (event, args) => {
-        let { status, msg, data } = args;
-        let _data = data.map((item) => {
-          let amount = item["amount"] + "";
-          let length = amount.length - 2;
-          amount = `${amount.substr(0, length)}.${amount.substr(length, 2)}`;
-          return {
-            ymd: item["ymd"] + "",
-            amount: Number(amount),
-          };
-        });
-        this.refreshChart(_data);
+    ipcRenderer.on("async-daliy-list-by-code-and-date-range-reply", (event, args) => {
+      let { status, msg, data } = args;
+      let _data = data.map((item) => {
+        let amount = item["amount"] + "";
+        let length = amount.length - 2;
+        amount = `${amount.substr(0, length)}.${amount.substr(length, 2)}`;
+        return {
+          ymd: item["ymd"] + "",
+          amount: Number(amount),
+        };
       });
-    }
+      this.refreshChart(_data);
+    });
+    
   },
   methods: {
     refreshChart(data: Array<Object>) {
