@@ -5,8 +5,7 @@
  * 基本信息业务逻辑
  */
 const { ipcMain, autoUpdater } = require('electron')
-const { sqliteDB } = require('./sqlite_db')
-
+const { sqliteDB, response } = require('./sqlite_db')
 
 /**
  * 接收加载基金风格信息事件，并发送一个包含风格列表的返回事件
@@ -124,7 +123,6 @@ ipcMain.on('async-info', (event, args) => {
                     amount = `${amount.substring(0, length)}.${amount.substring(length)}`;
                 }
 
-                console.log('amount--->', amount);
                 data.push({
                     code: item['funds_code'],
                     alias: item['funds_alias'],
@@ -214,4 +212,23 @@ ipcMain.on('async-basic-info-delete', (event, args) => {
             result.message = err;
             event.reply('async-basic-info-delete-reply', result)
         });
-})
+});
+
+
+/**
+ * async-basic-info-list
+ * 获取全部基金的基础信息
+ */
+ipcMain.on('async-basic-info-list', (event, args) => {
+    const sql = `SELECT * FROM f_info ORDER BY funds_code ASC`;
+    sqliteDB.query(sql).then(rows => {
+        let result = rows.map(x => { 
+            return {
+                code: x['funds_code'],
+                alias: x['funds_alias']
+            }
+         })
+         response['data'] = result;
+         event.reply('async-basic-info-list-reply', response);
+    })
+});

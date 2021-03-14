@@ -35,9 +35,9 @@ ipcMain.on('async-daliy-save', (event, args) => {
                     // 更新
                     const updateSql = `UPDATE f_daliy_log SET funds_amount=${amount} WHERE ymd=${ymd} AND funds_code='${code}'`;
                     sqliteDB.execute(updateSql)
-                    .then(msg => event.reply('async-daliy-save-reply', msg))
-                    .catch(err => console.log('save', err))
-                    .finally(() => calculateAll(ymd));
+                        .then(msg => event.reply('async-daliy-save-reply', msg))
+                        .catch(err => console.log('save', err))
+                        .finally(() => calculateAll(ymd));
                 } else {
                     // 插入
                     const insertSql = `INSERT INTO f_daliy_log (funds_code, ymd, y, m, d, funds_amount, log_type) values ($code, $ymd, $y, $m, $d, $amount, $logType)`;
@@ -46,9 +46,9 @@ ipcMain.on('async-daliy-save', (event, args) => {
                     let d = Number(ymd.substr(6, 2));
                     let data = { $code: code, $ymd: ymd, $y: y, $m: m, $d: d, $amount: amount, $logType: logType };
                     sqliteDB.insert(insertSql, data)
-                    .then(id => event.reply('async-daliy-save-reply', id))
-                    .catch(err => console.log('save2', err))
-                    .finally(() => calculateAll(ymd));
+                        .then(id => event.reply('async-daliy-save-reply', id))
+                        .catch(err => console.log('save2', err))
+                        .finally(() => calculateAll(ymd));
                 }
             });
 
@@ -124,7 +124,7 @@ ipcMain.on('async-calculate-all', (event, args) => {
  * 提供基金日历需要的数据
  */
 ipcMain.on('async-daliy-list', (event, args) => {
-    let { code, ymd} = args;
+    let { code, ymd } = args;
     let year = Number(`${ymd}`.substr(0, 4));
     let month = Number(`${ymd}`.substr(4, 2));
     const sql = `SELECT funds_amount as 'amount', ymd as 'date' FROM f_daliy_log WHERE funds_code='${code}' AND y=${year} AND m=${month} AND log_type=0 ORDER BY ymd ASC`;
@@ -148,3 +148,28 @@ ipcMain.on('async-daliy-list', (event, args) => {
         event.reply('async-daliy-list-reply', response);
     });
 });
+
+/**
+ * 按基金代码和时间范围选择
+ */
+ipcMain.on('async-daliy-list-by-code-and-date-range', (event, args) => {
+    console.log('args', args);
+    let { code, startYmd, endYmd, filterZero } = args;
+    let sql;
+    if (filterZero === "0") {
+        sql = `SELECT ymd, y, m, funds_amount as 'amount' FROM f_daliy_log WHERE funds_code='${code}' AND ymd < ${endYmd} AND ymd >= ${startYmd} AND funds_amount != 0 ORDER BY ymd ASC`;
+    } else {
+        sql = `SELECT ymd, y, m, funds_amount as 'amount' FROM f_daliy_log WHERE funds_code='${code}' AND ymd < ${endYmd} AND ymd >= ${startYmd} ORDER BY ymd ASC`;
+    }
+    console.log('sql', sql);
+    sqliteDB.query(sql)
+        .then(rows => {
+            console.log('daliy list code & date range', rows);
+            response['data'] = rows;
+            event.reply('async-daliy-list-by-code-and-date-range-reply', response);
+        })
+        .catch(err => {
+            response.status = 1;
+            response.msg = err.message;
+        })
+})
