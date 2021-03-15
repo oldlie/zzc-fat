@@ -82,6 +82,7 @@ export default defineComponent({
       height: 300,
     });
 
+    ipcRenderer.removeAllListeners("async-daliy-list-by-code-and-date-range-reelye");
     ipcRenderer.on("async-daliy-list-by-code-and-date-range-reply", (event, args) => {
       let { status, msg, data } = args;
       let _data = data.map((item) => {
@@ -95,7 +96,6 @@ export default defineComponent({
       });
       this.refreshChart(_data);
     });
-    
   },
   methods: {
     refreshChart(data: Array<Object>) {
